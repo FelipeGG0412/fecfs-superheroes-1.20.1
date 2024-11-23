@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.fecfssuperheroes.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "GeoArmorRendererMixin",
+    "InventoryScreenMixin",
+    "LivingEntityMixin",
+    "PlayerEntityRendererMixin",
+    "ServerPlayerEntityMixin",
+    "AbstractClientPlayerEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "AbstractClientPlayerEntityMixin"
+  ]
+}

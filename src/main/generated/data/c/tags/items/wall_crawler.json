@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "fecfs-superheroes:smsr_boots",
+    "fecfs-superheroes:smsr_leggings",
+    "fecfs-superheroes:smsr_chestplate",
+    "fecfs-superheroes:smsr_helmet"
+  ]
+}
