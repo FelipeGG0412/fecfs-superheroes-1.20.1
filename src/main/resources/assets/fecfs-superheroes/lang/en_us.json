@@ -1,6 +1,8 @@
 {
-  "item.fecfs-superheroes.smsr_boots": "Spider-Man Boots (RAIMI)",
-  "item.fecfs-superheroes.smsr_leggings": "Spider-Man Leggings (RAIMI)",
-  "item.fecfs-superheroes.smsr_chestplate": "Spider-Man Chestplate (RAIMI)",
-  "item.fecfs-superheroes.smsr_helmet": "Spider-Man Helmet (RAIMI)"
+  "item.fecfs-superheroes.smsr_boots": "Spider-Man Boots \uE2E0",
+  "item.fecfs-superheroes.smsr_leggings": "Spider-Man Leggings \uE2E0",
+  "item.fecfs-superheroes.smsr_chestplate": "Spider-Man Chestplate \uE2E0",
+  "item.fecfs-superheroes.smsr_helmet": "Spider-Man Helmet \uE2E0",
+
+  "item.fecfs-superheroes.web_shooters": "Web-Shooters"
 }

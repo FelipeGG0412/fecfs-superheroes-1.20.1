@@ -1,6 +1,8 @@
 package com.fecfssuperheroes.power.custom;
 
 import com.fecfssuperheroes.power.Power;
+import com.fecfssuperheroes.util.FecfsTags;
+import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -17,6 +19,7 @@ public class Jump extends Power {
     }
     @Override
     public void apply(PlayerEntity player) {
+        if(HeroUtil.isWearingSuit(player, FecfsTags.Items.FULLSUIT)) return;
         jump = true;
         currentAmplifier = this.getAmplifier() + Math.round(aFloat / 1.5f);
     }

@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "fecfs-superheroes:badges/raimi.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": ["\uE2E0"]
+    }
+  ]
+}

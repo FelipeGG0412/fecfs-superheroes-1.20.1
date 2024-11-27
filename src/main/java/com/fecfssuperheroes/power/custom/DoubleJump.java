@@ -3,6 +3,8 @@ package com.fecfssuperheroes.power.custom;
 import com.fecfssuperheroes.ability.WebSwinging;
 import com.fecfssuperheroes.power.Power;
 import com.fecfssuperheroes.util.FecfsAnimations;
+import com.fecfssuperheroes.util.FecfsTags;
+import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -46,6 +48,7 @@ public class DoubleJump extends Power {
     }
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
+        if(!HeroUtil.isWearingSuit(client.player, FecfsTags.Items.WEB_SLINGER)) return;
 
         onTick(client.player);
         doubleJump(client.player);

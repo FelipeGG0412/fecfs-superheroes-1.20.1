@@ -8,7 +8,7 @@ public class FecfsClientEvents {
     public static void animationTickEvents(MinecraftClient client) {
         PlayerEntity user = client.player;
         if(user != null) {
-            FecfsAnimations.playSpidermanDiveAnimation(user);
+//            FecfsAnimations.playSpiderManDiveAnimation(user);
         }
     }
 }

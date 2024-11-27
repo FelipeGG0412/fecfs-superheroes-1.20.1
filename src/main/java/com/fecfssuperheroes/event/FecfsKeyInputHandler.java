@@ -15,6 +15,9 @@ public class FecfsKeyInputHandler {
     public static final String KEY_CATEGORY_ABILITIES = "key.category.abilities";
     public static final String KEY_ABILITY_ONE = "key.fecfs-superheroes.abilityone";
 
+    public static final String keyAbilityOne = "R: ";
+
+
     public static KeyBinding abilityOne;
 
     public static void registerKeyInputs() {

@@ -4,6 +4,8 @@ import com.fecfssuperheroes.FecfsSuperheroes;
 import com.fecfssuperheroes.power.custom.*;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.PowerUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
 import net.minecraft.registry.tag.TagKey;
 
@@ -31,10 +33,6 @@ public class FecfsPowers {
 
                 new FallResistance(75),
                 new Resistance(60)
-
-
-
-
         );
 
         PowerUtil.registerArmorPowers(spiderManTag, spiderManPowers);

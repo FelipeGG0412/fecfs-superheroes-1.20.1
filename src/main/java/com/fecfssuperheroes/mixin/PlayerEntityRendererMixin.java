@@ -2,7 +2,9 @@ package com.fecfssuperheroes.mixin;
 
 import com.fecfssuperheroes.item.client.SMSRModel;
 import com.fecfssuperheroes.item.client.SMSRRenderer;
+import com.fecfssuperheroes.item.client.WebShootersRenderer;
 import com.fecfssuperheroes.item.custom.SMSRArmorItem;
+import com.fecfssuperheroes.item.custom.WebShootersArmorItem;
 import com.fecfssuperheroes.util.FecfsTags;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.model.ModelPart;
@@ -16,13 +18,16 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.Optional;
@@ -128,17 +133,45 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     private void renderArm(
             MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve,
             CallbackInfo ci) {
-        GeoArmorRenderer<SMSRArmorItem> armorRenderer = new SMSRRenderer();
-        ItemStack stack = player.getInventory().getArmorStack(2);
-        if (stack != null && stack.getItem() instanceof SMSRArmorItem) {
-            matrices.push();
+        EquipmentSlot slot = EquipmentSlot.CHEST; // First-person arm rendering typically involves chest slot only
+        ItemStack stack = player.getInventory().getArmorStack(slot.getEntitySlotId());
 
-            armorRenderer.prepForRender(player, stack, EquipmentSlot.CHEST, armorRenderer);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(5));
-            matrices.translate(0, (float) 0.01, 0);
-            ArmorRenderer.renderPart(matrices, vertexConsumers, light, stack, armorRenderer, SMSRModel.getTexture());
-            matrices.pop();
+        if (!stack.isEmpty() && stack.getItem() instanceof ArmorItem) {
+            GeoArmorRenderer<?> armorRenderer = getArmorRenderer(stack);
+            if (armorRenderer != null) {
+                matrices.push();
 
+                // Prepare for rendering
+                armorRenderer.prepForRender(player, stack, slot, armorRenderer);
+
+                // Apply first-person-specific transformations
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(5));
+                matrices.translate(0, 0.01f, 0);
+
+                // Render the visible arm part of the armor
+                ArmorRenderer.renderPart(matrices, vertexConsumers, light, stack, armorRenderer, getArmorTexture(stack, slot));
+
+                matrices.pop();
+            }
         }
     }
+
+
+    @Unique
+    private GeoArmorRenderer<?> getArmorRenderer(ItemStack stack) {
+        if (stack.getItem() instanceof SMSRArmorItem) {
+            return new SMSRRenderer();
+        } else if(stack.getItem() instanceof WebShootersArmorItem) {
+            return new WebShootersRenderer();
+        }
+        return null;
+    }
+
+    @Unique
+    private Identifier getArmorTexture(ItemStack stack, EquipmentSlot slot) {
+        return new Identifier("minecraft", "textures/models/armor/chainmail_layer_1.png");
+    }
+
+
+
 }

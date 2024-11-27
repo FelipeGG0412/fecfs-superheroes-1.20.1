@@ -23,5 +23,6 @@ public class FecfsModelProvider extends FabricModelProvider {
         itemModelGenerator.register(FecfsItems.SMSR_CHESTPLATE, Models.GENERATED);
         itemModelGenerator.register(FecfsItems.SMSR_LEGGINGS, Models.GENERATED);
         itemModelGenerator.register(FecfsItems.SMSR_BOOTS, Models.GENERATED);
+        itemModelGenerator.register(FecfsItems.WEB_SHOOTERS, Models.GENERATED);
     }
 }
