@@ -1,41 +1,28 @@
 package com.fecfssuperheroes.ability;
 
-import com.fecfssuperheroes.FecfsSuperheroes;
-import com.fecfssuperheroes.item.FecfsItems;
 import com.fecfssuperheroes.util.FecfsAnimations;
+import com.fecfssuperheroes.util.WebRendererUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.*;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.data.client.TextureMap;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Arm;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.world.RaycastContext;
 
 @Environment(EnvType.CLIENT)
 public class WebSwinging {
+    private static int cooldownTicks = 0;
+    private static boolean isCooldownActive = false;
+    private static PlayerEntity lastSwingPlayer = null;
     public static boolean isSwinging = false;
     private static int swingTime = 0;
-    private static boolean hasDamaged = false;
     public static Vec3d anchorPoint = null;
-    private static ModelPart webLineModel;
     private static double initialWebLength = 0;
     private static final double SPRING_CONSTANT = 0.05;
     private static final double DAMPING_COEFFICIENT = 0.000125;
@@ -53,59 +40,59 @@ public class WebSwinging {
                 FecfsAnimations.playSpiderManSwingingAnimations(client.player);
             }});
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player != null) {
-                onRenderWorld(context, client.player, context.tickDelta());
-            }});
-        EntityModelLayerRegistry.registerModelLayer(new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_line"), "main"), WebLineModel::getTexturedModelData);
-    }
-    public static boolean canSwing(PlayerEntity player) {
-        return (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER) || HeroUtil.isWearingWebShooter(player))&& !player.getAbilities().flying &&
-                player.isAlive() && !player.isTouchingWater();
+            PlayerEntity player = MinecraftClient.getInstance().player;
+            if (player != null) {
+                WebRendererUtil.renderWebLine(
+                        context.matrixStack(),
+                        context.consumers(),
+                        player,
+                        anchorPoint,
+                        context.tickDelta(),
+                        true
+                );
+            }
+        });
     }
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
-        if(anchorPoint == null) return;
+        if (isCooldownActive) {
+            if (cooldownTicks > 0) {
+                cooldownTicks--;
+            } else {
+                isCooldownActive = false;
+            }
+        }
         if (isSwinging) {
             swing(client.player);
-            client.player.sendMessage(Text.literal("Velocity: "+client.player.getVelocity()), true);
             FecfsAnimations.playSpiderManSwingingAnimations(client.player);
-            if(!hasDamaged && isSwinging && client.player.horizontalCollision) {
-                boolean damagePositiveNegativeX = (client.player.getVelocity().x > 1.25 || client.player.getVelocity().x < -1.25);
-                boolean damagePositiveNegativeZ = (client.player.getVelocity().z > 1.25 || client.player.getVelocity().z < -1.25);
-                if(HeroUtil.isWearingWebShooter(client.player) && (damagePositiveNegativeX || damagePositiveNegativeZ)) {
-                    client.player.damage(client.player.getDamageSources().flyIntoWall(), (damage(client.player)));
-                    hasDamaged = true;
+        }
+    }
+    public static void startSwing(PlayerEntity player) {
+        if (HeroUtil.canUseWeb(player) && !isCooldownActive) {
+            BlockHitResult hitRes = HeroUtil.raycast(player, 150);
+            if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK && swingHand(player) != null) {
+                anchorPoint = hitRes.getPos();
+                isSwinging = true;
+                swingTime = 0;
+                initialWebLength = HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN)
+                        ? Math.min(anchorPoint.subtract(player.getPos()).length(), 120.0)
+                        : Math.min(anchorPoint.subtract(player.getPos()).length(), 70.0);
+                player.setNoDrag(true);
+                initialToPlayer = player.getPos().subtract(anchorPoint).normalize();
+                swingPlaneNormal = initialToPlayer.crossProduct(new Vec3d(0, -1, 0)).normalize();
+                swingDuration = 0;
+                if (HeroUtil.isWearingWebShooter(player)) {
+                    cooldownTicks = 100;
+                } else if (HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN)) {
+                    cooldownTicks = 40;
                 }
+                isCooldownActive = true;
+                lastSwingPlayer = player;
             }
         }
     }
-    public static BlockHitResult hitResult(PlayerEntity player) {
-        Vec3d start = player.getCameraPosVec(1.0F);
-        Vec3d end = start.add(player.getRotationVector().multiply(150));
-        return player.getWorld().raycast(new RaycastContext(
-                start, end,
-                RaycastContext.ShapeType.OUTLINE,
-                RaycastContext.FluidHandling.NONE,
-                player));
-    }
-    public static void startSwing(PlayerEntity player) {
-        BlockHitResult hitRes = hitResult(player);
-        if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK && swingHand(player) != null) {
-            anchorPoint = hitRes.getPos();
-            isSwinging = true;
-            swingTime = 0;
-            initialWebLength = HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN) ? Math
-                    .min(anchorPoint.subtract(player.getPos()).length(), 120.0) :  Math.min(anchorPoint.subtract(player.getPos()).length(), 70.0);;
-            player.setNoDrag(true);
-            initialToPlayer = player.getPos().subtract(anchorPoint).normalize();
-            swingPlaneNormal = initialToPlayer.crossProduct(new Vec3d(0, -1, 0)).normalize();
-            swingDuration = 0;
-            hasDamaged = false;
-        }
-    }
     public static void swing(PlayerEntity player) {
-        if (anchorPoint == null || !canSwing(player)) {
+        if (anchorPoint == null || !HeroUtil.canUseWeb(player)) {
             stopSwinging(player);
             return;
         }
@@ -154,6 +141,12 @@ public class WebSwinging {
         }
 
     }
+    public static boolean isSwingOnCooldown() {
+        return isCooldownActive;
+    }
+    public static int getRemainingCooldownTicks() {
+        return cooldownTicks;
+    }
     public static void stopSwinging(PlayerEntity player) {
         isSwinging = false;
         anchorPoint = null;
@@ -183,119 +176,5 @@ public class WebSwinging {
             angleDegrees = -angleDegrees;
         }
         return angleDegrees;
-    }
-    private static float damage(PlayerEntity player) {
-        float positiveX = player.getVelocity().x > 1.25 ? (float) player.getVelocity().x : 0;
-        float negativeX = player.getVelocity().x < -1.25 ? (float) player.getVelocity().x : 0;
-        float positiveZ = player.getVelocity().z > 1.25 ? (float) player.getVelocity().z : 0;
-        float negativeZ = player.getVelocity().z < -1.25 ? (float) player.getVelocity().z : 0;
-
-        if(player.getVelocity().x > 1.25) {
-            return (positiveX * 12);
-        } else if(player.getVelocity().x < -1.25) {
-            return (negativeX * (-12));
-        }
-
-        if(player.getVelocity().z > 1.25) {
-            return (positiveZ * 12);
-        } else if(player.getVelocity().z < -1.25) {
-            return (negativeZ * (-12));
-        }
-        else {return 0;}
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void onRenderWorld(WorldRenderContext context, PlayerEntity player, float tickDelta) {
-        renderWebLine(context.matrixStack(), context.consumers(), player, tickDelta);
-    }
-    @Environment(EnvType.CLIENT)
-    public static void renderWebLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, PlayerEntity player, float tickDelta) {
-        if (player == null || !isSwinging || anchorPoint == null) return;
-        if (webLineModel == null) {
-            webLineModel = MinecraftClient.getInstance().getEntityModelLoader().getModelPart(new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_line"), "main"));
-        }
-        MinecraftClient client = MinecraftClient.getInstance();
-        Vec3d webStartPos = getWebStartPosition(player, tickDelta);
-        if (webStartPos == null) return;
-        int segmentCount = (int) Math.ceil(webStartPos.distanceTo(anchorPoint));
-        segmentCount = Math.max(segmentCount, 8);
-        Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
-        Vec3d controlPoint = calculateControlPoint(webStartPos, anchorPoint);
-        float modelRotationOffset = -((float) Math.PI / 2);
-
-        for (int i = 1; i < segmentCount; i++) {
-            Vec3d startPos = quadraticBezier(webStartPos, controlPoint, anchorPoint, (double) i / segmentCount);
-            Vec3d endPos = quadraticBezier(webStartPos, controlPoint, anchorPoint, (double) (i + 1) / segmentCount);
-            Vec3d segmentVec = endPos.subtract(startPos);
-            float segmentLengthF = (float) segmentVec.length();
-            if (segmentLengthF < 1e-6) {
-                continue;
-            }
-            Vec3d dir = segmentVec.normalize();
-            double dx = dir.x;
-            double dy = dir.y;
-            double dz = dir.z;
-            float yaw = (float) Math.atan2(-dx, dz);
-            float pitch = (float) Math.asin(-dy);
-            matrices.push();
-            matrices.translate(startPos.x - cameraPos.x, startPos.y - cameraPos.y, startPos.z - cameraPos.z);
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotation(-yaw));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch + modelRotationOffset));
-            matrices.scale(1.0F, segmentLengthF, 1.0F);
-            VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(
-                    new Identifier(FecfsSuperheroes.MOD_ID, "textures/entity/web_line.png")));
-            webLineModel.render(matrices, vertexConsumer, light(player), OverlayTexture.DEFAULT_UV);
-
-            matrices.pop();
-        }
-    }
-    public static Vec3d getWebStartPosition(PlayerEntity player, float tickDelta) {
-        if (player != null) {
-            if (MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) {
-                return getFirstPersonHandPosition(player);
-            } else {
-                Vec3d playerPos = player.getLerpedPos(tickDelta);
-                double headHeight = player.getStandingEyeHeight() + 0.5;
-                return new Vec3d(playerPos.x, playerPos.y + headHeight, playerPos.z);
-            }
-        }
-        return null;
-    }
-    public static Vec3d getFirstPersonHandPosition(PlayerEntity player) {
-        return MinecraftClient.getInstance().gameRenderer.getCamera().getPos().add(player.getMainArm() == Arm.RIGHT ? 0.3 : -0.3, -0.25, -0.5);
-    }
-    private static Vec3d calculateControlPoint(Vec3d start, Vec3d end) {
-        return start.lerp(end, 0.5).add(0, -Math.min(5, start.distanceTo(end) * 0.2), 0);
-    }
-    private static Vec3d quadraticBezier(Vec3d p0, Vec3d p1, Vec3d p2, double t) {
-        return new Vec3d(
-                (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x,
-                (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y,
-                (1 - t) * (1 - t) * p0.z + 2 * (1 - t) * t * p1.z + t * t * p2.z);
-    }
-    private static int light(PlayerEntity player) {
-        return player.getWorld().isNight() ? LightmapTextureManager.MAX_LIGHT_COORDINATE / 200 : LightmapTextureManager.MAX_LIGHT_COORDINATE;
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static class WebLineModel {
-
-        private final ModelPart bone;
-
-        public WebLineModel(ModelPart root) {
-            this.bone = root.getChild("bone");
-        }
-
-        public static TexturedModelData getTexturedModelData() {
-            ModelData modelData = new ModelData();
-            ModelPartData modelPartData = modelData.getRoot();
-            ModelPartData bone = modelPartData.addChild("bone", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -9.0F, -1.0F, 2.0F, 18.0F, 2.0F, new Dilation(-0.25F))
-                    .uv(9, 0).cuboid(-1.0F, -9.0F, -1.0F, 2.0F, 18.0F, 2.0F, new Dilation(0)), ModelTransform.of(0.0F, 15.0F, 0.0F, -(((float) Math.PI)), 0f, 0));
-            return TexturedModelData.of(modelData, 32, 32);
-        }
-
-        public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-            bone.render(matrices, vertices, light, overlay);
-        }
     }
 }

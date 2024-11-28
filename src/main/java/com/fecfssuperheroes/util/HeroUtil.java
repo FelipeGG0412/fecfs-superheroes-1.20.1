@@ -6,6 +6,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class HeroUtil {
     public static boolean canPlayJumpAnimation = false;
@@ -32,5 +35,20 @@ public class HeroUtil {
     }
     public static boolean isSlotInTag(PlayerEntity player, EquipmentSlot slot, TagKey<Item> tag) {
         return player.getEquippedStack(slot).isIn(tag);
+    }
+    public static BlockHitResult raycast(PlayerEntity player, int distance) {
+        Vec3d start = player.getCameraPosVec(1.0F);
+        Vec3d end = start.add(player.getRotationVector().multiply(distance));
+        return player.getWorld().raycast(new RaycastContext(
+                start, end,
+                RaycastContext.ShapeType.OUTLINE,
+                RaycastContext.FluidHandling.NONE,
+                player));
+    }
+    public static boolean canUseWeb(PlayerEntity player) {
+        return (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER) || HeroUtil.isWearingWebShooter(player)) &&
+                !player.getAbilities().flying &&
+                player.isAlive() &&
+                !player.isTouchingWater();
     }
 }
