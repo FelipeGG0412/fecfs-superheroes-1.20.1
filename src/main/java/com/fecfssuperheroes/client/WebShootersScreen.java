@@ -4,6 +4,7 @@ import com.fecfssuperheroes.ability.WebSwinging;
 import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.event.FecfsKeyInputHandler;
 import com.fecfssuperheroes.item.FecfsItems;
+import com.fecfssuperheroes.util.HeroUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -17,16 +18,17 @@ public class WebShootersScreen extends InGameHud implements HudRenderCallback {
 
     @Override
     public void onHudRender(DrawContext drawContext, float tickDelta) {
+        if(!HeroUtil.isWearingWebShooter(MinecraftClient.getInstance().player)) return;
         FecfsScreens.renderCooldown(drawContext, WebSwinging.isSwingOnCooldown(), 24, 24, 15,15);
         FecfsScreens.renderHud(drawContext, 5, 4, 24, 24, 15, 15, FecfsKeyInputHandler.abilityOne,
-                this.getTextRenderer(), "R");
+                this.getTextRenderer(), FecfsKeyInputHandler.getKeyAbilityOne());
         FecfsScreens.drawItem(drawContext, 15, 15, FecfsItems.WEB_SHOOTERS.getDefaultStack());
 
 
         FecfsScreens.renderCooldown(drawContext, WebZip.isWebZipOnCooldown(), 24, 24, 15,41);
         FecfsScreens.renderHud(drawContext, 5, -1, 24, 24, 15, 41, FecfsKeyInputHandler.abilityTwo,
-                this.getTextRenderer(), "G");
-        FecfsScreens.drawItem(drawContext, 15, 41, FecfsItems.WEB_SHOOTERS.getDefaultStack());
+                this.getTextRenderer(), FecfsKeyInputHandler.getKeyAbilityTwo());
+        FecfsScreens.drawItem(drawContext, 15, 41, FecfsItems.WEB_ZIP_ICON.getDefaultStack());
 
     }
 }

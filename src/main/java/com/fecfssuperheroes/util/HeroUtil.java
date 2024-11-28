@@ -1,5 +1,7 @@
 package com.fecfssuperheroes.util;
 
+import com.fecfssuperheroes.ability.WebSwinging;
+import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.item.FecfsItems;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,10 +47,17 @@ public class HeroUtil {
                 RaycastContext.FluidHandling.NONE,
                 player));
     }
-    public static boolean canUseWeb(PlayerEntity player) {
-        return (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER) || HeroUtil.isWearingWebShooter(player)) &&
-                !player.getAbilities().flying &&
-                player.isAlive() &&
-                !player.isTouchingWater();
+    public static boolean canUseWeb(PlayerEntity player, boolean ground) {
+        if(ground) {
+            return (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER) || HeroUtil.isWearingWebShooter(player)) &&
+                    !player.getAbilities().flying &&
+                    player.isAlive() &&
+                    !player.isTouchingWater();
+        } else {
+            return (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER) || HeroUtil.isWearingWebShooter(player)) &&
+                    !player.getAbilities().flying &&
+                    player.isAlive() &&
+                    !player.isTouchingWater() && !player.isOnGround();
+        }
     }
 }

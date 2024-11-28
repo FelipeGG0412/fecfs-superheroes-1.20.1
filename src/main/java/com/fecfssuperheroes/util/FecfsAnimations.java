@@ -61,8 +61,7 @@ public class FecfsAnimations implements IAnimatedHero {
         builder.head.pitch.setEnabled(false);
         anim = builder.build();
         if(anim != null) {
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(2, Ease.LINEAR),
-                    new KeyframeAnimationPlayer(anim));
+            animationContainer.setAnimation(new KeyframeAnimationPlayer(anim));
         }
     }
     public static void playSpiderManSwingingAnimations(PlayerEntity user) {

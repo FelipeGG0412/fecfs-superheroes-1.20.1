@@ -24,6 +24,8 @@ public class FecfsItems {
     public static Item WEB_SHOOTERS = registerItem("web_shooters", new WebShootersArmorItem(FecfsArmorMaterials.WEB_SHOOTERS, ArmorItem.Type.CHESTPLATE,
             new FabricItemSettings()));
 
+    public static Item WEB_ZIP_ICON = registerItem("web_zip_icon", new Item(new FabricItemSettings()));
+
     private static Item registerItem(String name, Item item) {
         return Registry.register(Registries.ITEM, new Identifier(FecfsSuperheroes.MOD_ID, name), item);
     }

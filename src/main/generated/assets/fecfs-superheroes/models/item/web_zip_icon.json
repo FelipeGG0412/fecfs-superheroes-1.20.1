@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fecfs-superheroes:item/web_zip_icon"
+  }
+}

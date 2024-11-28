@@ -19,7 +19,7 @@ public class Jump extends Power {
     }
     @Override
     public void apply(PlayerEntity player) {
-        if(HeroUtil.isWearingSuit(player, FecfsTags.Items.FULLSUIT)) return;
+        if(!HeroUtil.isWearingSuit(player, FecfsTags.Items.FULLSUIT)) return;
         jump = true;
         currentAmplifier = this.getAmplifier() + Math.round(aFloat / 1.5f);
     }

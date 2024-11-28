@@ -34,7 +34,8 @@ public class WebZip {
         });
     }
     public static void startZip(PlayerEntity player) {
-        if (HeroUtil.canUseWeb(player) && zipCooldown == 0) {
+        if(WebSwinging.isSwinging) return;
+        if (HeroUtil.canUseWeb(player, true) && zipCooldown == 0) {
             BlockHitResult hitRes = HeroUtil.raycast(player, 80);
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK) {
                 anchorPoint = hitRes.getPos();

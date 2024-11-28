@@ -68,7 +68,7 @@ public class WebSwinging {
         }
     }
     public static void startSwing(PlayerEntity player) {
-        if (HeroUtil.canUseWeb(player) && !isCooldownActive) {
+        if (HeroUtil.canUseWeb(player, false) && !isCooldownActive) {
             BlockHitResult hitRes = HeroUtil.raycast(player, 150);
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK && swingHand(player) != null) {
                 anchorPoint = hitRes.getPos();
@@ -92,7 +92,7 @@ public class WebSwinging {
         }
     }
     public static void swing(PlayerEntity player) {
-        if (anchorPoint == null || !HeroUtil.canUseWeb(player)) {
+        if (anchorPoint == null || !HeroUtil.canUseWeb(player, false)) {
             stopSwinging(player);
             return;
         }

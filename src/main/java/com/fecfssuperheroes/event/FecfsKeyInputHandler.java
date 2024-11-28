@@ -24,6 +24,21 @@ public class FecfsKeyInputHandler {
     public static KeyBinding abilityOne;
     public static KeyBinding abilityTwo;
 
+    public static String getKeyAbilityOne() {
+        if(abilityOne != null) {
+            return abilityOne.getBoundKeyLocalizedText().getString();
+        } else {
+            return "";
+        }
+    }
+    public static String getKeyAbilityTwo() {
+        if(abilityOne != null) {
+            return abilityTwo.getBoundKeyLocalizedText().getString();
+        } else {
+            return "";
+        }
+    }
+
     public static void registerKeyInputs() {
        ClientTickEvents.END_CLIENT_TICK.register(client -> {
            PlayerEntity player = MinecraftClient.getInstance().player;
@@ -54,7 +69,7 @@ public class FecfsKeyInputHandler {
             webCooldown = HeroUtil.isWearingWebShooter(player) ? 300 : 80;
 
         }
-        if(MinecraftClient.getInstance().options.jumpKey.wasPressed() && (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER)
+        if( MinecraftClient.getInstance().mouse.wasLeftButtonClicked() && (HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER)
                 || HeroUtil.isWearingWebShooter(player))) {
             WebSwinging.boost(player);
             WebSwinging.stopSwinging(player);
