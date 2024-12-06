@@ -1,0 +1,30 @@
+{
+  "web_shoot": {
+    "subtitle": "sounds.fecfs-superheroes.web_shoot",
+    "sounds": [
+      "fecfs-superheroes:web_shoot1",
+      "fecfs-superheroes:web_shoot2",
+      "fecfs-superheroes:web_shoot3"
+    ]
+  },
+  "web_raimi": {
+    "subtitle": "sounds.fecfs-superheroes.web_raimi",
+    "sounds": [
+      "fecfs-superheroes:web_raimi1",
+      "fecfs-superheroes:web_raimi2",
+      "fecfs-superheroes:web_raimi3"
+    ]
+  },
+  "web_projectile": {
+    "subtitle": "sounds.fecfs-superheroes.web_projectile",
+    "sounds": [
+      "fecfs-superheroes:web_projectile"
+    ]
+  },
+  "web_shoot_fail": {
+    "subtitle": "sounds.fecfs-superheroes.web_shoot_fail",
+    "sounds": [
+      "fecfs-superheroes:web_shoot_fail"
+    ]
+  }
+}

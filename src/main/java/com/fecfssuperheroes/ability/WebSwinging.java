@@ -1,15 +1,23 @@
 package com.fecfssuperheroes.ability;
 
+import com.fecfssuperheroes.networking.FecfsNetworking;
+import com.fecfssuperheroes.sound.FecfsSounds;
+import com.fecfssuperheroes.sound.WebSwingingSoundInstance;
 import com.fecfssuperheroes.util.FecfsAnimations;
-import com.fecfssuperheroes.util.WebRendererUtil;
+import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Arm;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -17,6 +25,10 @@ import net.minecraft.util.math.*;
 
 @Environment(EnvType.CLIENT)
 public class WebSwinging {
+    private static boolean isSoundPlaying = false;
+    private static WebSwingingSoundInstance currentSoundInstance;
+    public static boolean playFail = false;
+    public static boolean playNormal = false;
     private static int cooldownTicks = 0;
     private static boolean isCooldownActive = false;
     private static PlayerEntity lastSwingPlayer = null;
@@ -29,6 +41,7 @@ public class WebSwinging {
     private static Vec3d initialToPlayer = null;
     private static Vec3d swingPlaneNormal = null;
     public static int swingDuration = 0;
+    public static Direction anchorFacing = null;
     public static Arm swingHand(PlayerEntity player) {
         return player.getMainArm();
     }
@@ -39,10 +52,31 @@ public class WebSwinging {
             if (client.player != null && isSwinging) {
                 FecfsAnimations.playSpiderManSwingingAnimations(client.player);
             }});
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            PlayerEntity player = MinecraftClient.getInstance().player;
+            if (player == null) return;
+
+            if (isSwinging) {
+                // Start sound if not already playing
+                if (currentSoundInstance == null) {
+                    currentSoundInstance = new WebSwingingSoundInstance(SoundEvents.ITEM_ELYTRA_FLYING, MinecraftClient.getInstance());
+                }
+
+                MinecraftClient.getInstance().getSoundManager().play(currentSoundInstance);
+            } else {
+                // Stop sound if swinging ends
+                if (isSoundPlaying) {
+                    if (currentSoundInstance != null) {
+                        currentSoundInstance = null;
+                    }
+                    isSoundPlaying = false;
+                }
+            }
+        });
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                WebRendererUtil.renderWebLine(
+                RendererUtils.renderWebLine(
                         context.matrixStack(),
                         context.consumers(),
                         player,
@@ -50,6 +84,8 @@ public class WebSwinging {
                         context.tickDelta(),
                         true
                 );
+                RendererUtils.renderWebHits(context);
+                RendererUtils.renderPastWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
             }
         });
     }
@@ -72,6 +108,8 @@ public class WebSwinging {
             BlockHitResult hitRes = HeroUtil.raycast(player, 150);
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK && swingHand(player) != null) {
                 anchorPoint = hitRes.getPos();
+                anchorFacing = hitRes.getSide();
+                RendererUtils.showWebHit(anchorPoint, anchorFacing); // Call the helper method
                 isSwinging = true;
                 swingTime = 0;
                 initialWebLength = HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN)
@@ -88,7 +126,11 @@ public class WebSwinging {
                 }
                 isCooldownActive = true;
                 lastSwingPlayer = player;
+                playNormal = true;
+
             }
+        } else if(player.isOnGround() || anchorPoint == null || player.getAbilities().flying) {
+            playFail = true;
         }
     }
     public static void swing(PlayerEntity player) {
@@ -148,6 +190,10 @@ public class WebSwinging {
         return cooldownTicks;
     }
     public static void stopSwinging(PlayerEntity player) {
+        Vec3d webStartPos = RendererUtils.getWebStartPosition(player, 0);
+        if (webStartPos != null && anchorPoint != null) {
+            RendererUtils.addWebLine(webStartPos, anchorPoint);
+        }
         isSwinging = false;
         anchorPoint = null;
         swingTime = 0;
@@ -155,6 +201,10 @@ public class WebSwinging {
         initialToPlayer = null;
         swingPlaneNormal = null;
         swingDuration = 0;
+
+        if (currentSoundInstance != null) {
+            MinecraftClient.getInstance().getSoundManager().stop(currentSoundInstance);
+        }
     }
     public static void boost(PlayerEntity player) {
         if (!isSwinging || anchorPoint == null) return;

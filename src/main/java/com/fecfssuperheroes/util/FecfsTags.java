@@ -22,6 +22,7 @@ public class FecfsTags {
         public static final TagKey<Item> HERO = createItemTag("hero");
         public static final TagKey<Item> FULLSUIT = createItemTag("fullsuit");
         public static final TagKey<Item> SPIDERMAN = createItemTag("spiderman");
+        public static final TagKey<Item> RAIMI = createItemTag("raimi");
 
 
         private static TagKey<Item> createItemTag(String name) {

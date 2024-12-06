@@ -12,8 +12,9 @@
   },
   "client": [
     "AbstractClientPlayerEntityMixin",
+    "ClientLivingEntityMixin",
     "InventoryScreenMixin",
-    "PlayerEntityRendererMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "PlayerEntityRendererMixin"
   ]
 }

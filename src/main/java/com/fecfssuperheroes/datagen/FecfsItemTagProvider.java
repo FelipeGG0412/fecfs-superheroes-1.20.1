@@ -41,5 +41,10 @@ public class FecfsItemTagProvider extends FabricTagProvider.ItemTagProvider {
                 .add(FecfsItems.SMSR_LEGGINGS)
                 .add(FecfsItems.SMSR_CHESTPLATE)
                 .add(FecfsItems.SMSR_HELMET);
+        getOrCreateTagBuilder(FecfsTags.Items.RAIMI)
+                .add(FecfsItems.SMSR_BOOTS)
+                .add(FecfsItems.SMSR_LEGGINGS)
+                .add(FecfsItems.SMSR_CHESTPLATE)
+                .add(FecfsItems.SMSR_HELMET);
     }
 }
