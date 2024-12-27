@@ -1,11 +1,9 @@
 package com.fecfssuperheroes.mixin;
 
-import com.fecfssuperheroes.ability.WebSwinging;
 import com.fecfssuperheroes.item.client.SMSRRenderer;
 import com.fecfssuperheroes.item.client.WebShootersRenderer;
 import com.fecfssuperheroes.item.custom.SMSRArmorItem;
 import com.fecfssuperheroes.item.custom.WebShootersArmorItem;
-import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.model.ModelPart;
@@ -55,22 +53,24 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
             RendererUtils.legVisibility(player, scale, model);
         }
     }
-    @Inject(at = @At("TAIL"), method = "renderArm")
+
+
+    @Inject(at = @At("HEAD"), method = "renderArm", cancellable = true)
     private void renderArm(
             MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve,
             CallbackInfo ci) {
-        EquipmentSlot slot = EquipmentSlot.CHEST;
-        ItemStack stack = player.getInventory().getArmorStack(slot.getEntitySlotId());
+        ItemStack chestStack = player.getEquippedStack(EquipmentSlot.CHEST);
 
-        if (!stack.isEmpty() && stack.getItem() instanceof ArmorItem) {
-            GeoArmorRenderer<?> armorRenderer = getArmorRenderer(stack);
+        if (!chestStack.isEmpty() && chestStack.getItem() instanceof ArmorItem) {
+            GeoArmorRenderer<?> armorRenderer = getArmorRenderer(chestStack);
             if (armorRenderer != null) {
                 matrices.push();
-                armorRenderer.prepForRender(player, stack, slot, armorRenderer);
+                armorRenderer.prepForRender(player, chestStack, EquipmentSlot.CHEST, armorRenderer);
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(5));
                 matrices.translate(0, 0.01f, 0);
-                ArmorRenderer.renderPart(matrices, vertexConsumers, light, stack, armorRenderer, getArmorTexture());
+                ArmorRenderer.renderPart(matrices, vertexConsumers, light, chestStack, armorRenderer, getArmorTexture());
                 matrices.pop();
+                ci.cancel(); // Prevent further rendering
             }
         }
     }
@@ -79,7 +79,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     private GeoArmorRenderer<?> getArmorRenderer(ItemStack stack) {
         if (stack.getItem() instanceof SMSRArmorItem) {
             return new SMSRRenderer();
-        } else if(stack.getItem() instanceof WebShootersArmorItem) {
+        } else if (stack.getItem() instanceof WebShootersArmorItem) {
             return new WebShootersRenderer();
         }
         return null;

@@ -1,20 +1,15 @@
 package com.fecfssuperheroes.mixin;
 
-import com.fecfssuperheroes.ability.WebSwinging;
+import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.util.FecfsAnimations;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
@@ -39,7 +34,7 @@ public abstract class PlayerEntityMixin {
         if (player.isOnGround() && isFalling) {
             isFalling = false;
             double fallDistance = Math.max(player.fallDistance, startY - player.getY());
-            if (fallDistance >= 3 && !hasPlayedLandingAnimation) {
+            if (fallDistance >= 10 && !hasPlayedLandingAnimation) {
                 hasPlayedLandingAnimation = true;
                 FecfsAnimations.playSpiderManLandingAnimation(player);
             }
@@ -48,6 +43,6 @@ public abstract class PlayerEntityMixin {
 
     @ModifyReturnValue(method = "isBlockBreakingRestricted", at = @At("TAIL"))
     private boolean isBlockBreakingRestricted(boolean original) {
-        return original || WebSwinging.isSwinging || WebZip.isZipping();
+        return original || WebSwing.isSwinging || WebZip.isZipping();
     }
 }

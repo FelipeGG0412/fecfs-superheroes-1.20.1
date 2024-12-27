@@ -19,6 +19,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class WebZip {
     private static boolean isZipping = false;
+    public static boolean play = false;
     public static boolean canZip = false;
     private static Vec3d anchorPoint = null;
     private static int zipCooldown = 0;
@@ -43,32 +44,37 @@ public class WebZip {
                 RendererUtils.renderWebHits(context);
             }
         });
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
+            PlayerEntity player = MinecraftClient.getInstance().player;
+            if (player != null) {
+                RendererUtils.renderPastWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
+            }
+        });
     }
     public static void startZip(PlayerEntity player) {
-        if(WebSwinging.isSwinging) return;
-        ClientPlayNetworking.send(FecfsNetworking.WEB_SOUND, PacketByteBufs.create());
+        if(WebSwing.isSwinging) return;
         if (HeroUtil.canUseWeb(player, true) && zipCooldown == 0) {
-            BlockHitResult hitRes = HeroUtil.raycast(player, 80);
+            BlockHitResult hitRes = HeroUtil.raycast(player, (HeroUtil.isWearingWebShooter(player) ? 100 : 150));
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK) {
                 anchorPoint = hitRes.getPos();
                 anchorFacing = hitRes.getSide();
-                RendererUtils.showWebHit(anchorPoint, anchorFacing); // Call the helper method
-
+                RendererUtils.showWebHit(anchorPoint, anchorFacing);
+                play = true;
                 isZipping = true;
                 zipCooldown = HeroUtil.isWearingWebShooter(player) ? 45 : 30;
                 canZip = true;
+                player.getAbilities().allowFlying = false;
+                if(isZipping) {
+                    ClientPlayNetworking.send(FecfsNetworking.SOUND, PacketByteBufs.create());
+                }
             }
         }
     }
     private static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
-
-        // Handle cooldown
         if (zipCooldown > 0) {
             zipCooldown--;
         }
-
-        // Handle active zip
         if (isZipping && anchorPoint != null) {
             performZip(client.player);
         }
@@ -78,28 +84,28 @@ public class WebZip {
             stopZip();
             return;
         }
-
-        // Calculate the direction vector to the anchor
         Vec3d toAnchor = anchorPoint.subtract(player.getPos());
-
-        // Stop if the player is too close to the anchor point
         if (toAnchor.length() < 1.5) {
             stopZip();
             return;
         }
-
-        // Apply constant velocity toward the anchor
-        Vec3d pullVelocity = toAnchor.normalize().multiply(2.75); // Adjust the speed as needed
+        Vec3d pullVelocity = toAnchor.normalize().multiply(2.75);
         player.setVelocity(pullVelocity);
-
-        // Increment the zip tick counter
         zipTickCounter++;
     }
     private static void stopZip() {
+        if (MinecraftClient.getInstance().player != null && anchorPoint != null) {
+            Vec3d webStartPos = RendererUtils.getWebStartPosition(MinecraftClient.getInstance().player, 0);
+            if (webStartPos != null) {
+                RendererUtils.addWebLine(webStartPos, anchorPoint);
+            }
+        }
         isZipping = false;
         anchorPoint = null;
         zipTickCounter = 0;
+        MinecraftClient.getInstance().player.getAbilities().allowFlying = true;
     }
+
     public static boolean isWebZipOnCooldown() {
         return zipCooldown > 0;
     }

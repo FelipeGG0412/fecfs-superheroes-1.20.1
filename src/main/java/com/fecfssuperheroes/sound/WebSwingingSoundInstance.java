@@ -1,54 +1,58 @@
 package com.fecfssuperheroes.sound;
 
-import com.fecfssuperheroes.ability.WebSwinging;
-import net.minecraft.client.MinecraftClient;
+import com.fecfssuperheroes.ability.WebSwing;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.MovingSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 public class WebSwingingSoundInstance extends MovingSoundInstance {
-    private final MinecraftClient client;
-    private final float MAX_VOLUME = 1.0F; // Max volume for the sound
-    private final float MIN_VOLUME = 0.1F; // Minimum volume for the sound
-    private final float MAX_SPEED = 1.0F; // Speed threshold for max volume
-    private final float MIN_SPEED = 0.2F; // Speed threshold for minimum volume
+    private static final int FADE_IN_DURATION = (int) (20 * 1.35);
+    private static final int FADE_OUT_DURATION = (int) (20 * 1.5);
+    private static final float VOLUME_MULTIPLIER = 0.6F;
+    private final ClientPlayerEntity player;
+    private int tickCount;
 
-    private float lastSpeed = 0f;
-    private float currentSpeed = 0f;
-
-    public WebSwingingSoundInstance(SoundEvent soundEvent, MinecraftClient client) {
-        super(soundEvent, SoundCategory.PLAYERS, SoundInstance.createRandom());
-        this.client = client;
-        this.volume = 0.0F; // Start with 0 volume and adjust dynamically
-        this.pitch = 1.0F;
-        this.repeat = true; // We want it to loop
+    public WebSwingingSoundInstance(ClientPlayerEntity player) {
+        super(SoundEvents.ITEM_ELYTRA_FLYING, SoundCategory.PLAYERS, SoundInstance.createRandom());
+        this.player = player;
+        this.repeat = true;
+        this.repeatDelay = 0;
+        this.volume = 0.1F;
     }
 
     @Override
     public void tick() {
-        if (client.player != null && WebSwinging.isSwinging) {
-            Vec3d velocity = client.player.getVelocity();
-            this.currentSpeed = (float) velocity.length();
-
-            // Adjust the volume based on speed
-            if (currentSpeed >= MIN_SPEED) {
-                // Scale volume and pitch based on speed
-                this.volume = MathHelper.clamp((currentSpeed - MIN_SPEED) / (MAX_SPEED - MIN_SPEED) * (MAX_VOLUME - MIN_VOLUME) + MIN_VOLUME, MIN_VOLUME, MAX_VOLUME);
-                this.pitch = 1.0F + (currentSpeed / MAX_SPEED) * 0.5F; // Adjust pitch based on speed
+        this.tickCount++;
+        if (!this.player.isRemoved() && (this.tickCount <= FADE_IN_DURATION || WebSwing.isSwinging)) {
+            this.x = (double) ((float) this.player.getX());
+            this.y = (double) ((float) this.player.getY());
+            this.z = (double) ((float) this.player.getZ());
+            float speedFactor = (float) this.player.getVelocity().lengthSquared() * 3;
+            if ((double) speedFactor >= 1.0E-7) {
+                this.volume = MathHelper.clamp(speedFactor / 4.0F, 0.0F, 1.0F) * VOLUME_MULTIPLIER;
             } else {
-                this.volume = 0.0F; // If below the threshold, no sound
+                this.volume = 0.0F;
             }
 
-            // Update position to follow player
-            this.x = client.player.getX();
-            this.y = client.player.getY();
-            this.z = client.player.getZ();
+            if (this.tickCount < FADE_IN_DURATION) {
+                this.volume = this.volume * ((float) (this.tickCount) / FADE_IN_DURATION);
+            }
+
+            float maxPitchFactor = 0.8F;
+            if (this.volume > maxPitchFactor) {
+                this.pitch = 1.0F + (this.volume - maxPitchFactor);
+            } else {
+                this.pitch = 1.0F;
+            }
         } else {
-            this.setDone(); // Stop the sound if we're not swinging
+            if (this.volume > 0) {
+                this.volume -= (1.0F / FADE_OUT_DURATION) * VOLUME_MULTIPLIER;
+            } else {
+                this.setDone();
+            }
         }
     }
 }

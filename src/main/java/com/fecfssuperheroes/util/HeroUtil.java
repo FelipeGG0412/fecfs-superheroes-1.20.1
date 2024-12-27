@@ -1,8 +1,7 @@
 package com.fecfssuperheroes.util;
 
-import com.fecfssuperheroes.ability.WebSwinging;
-import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.item.FecfsItems;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -13,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 public class HeroUtil {
+    public static boolean canChargedJump = false;
     public static boolean canPlayJumpAnimation = false;
     public static boolean isWearingSuit(PlayerEntity player, TagKey<Item> tag) {
         if (player != null && player.getInventory().armor.toArray().length == 4) {
@@ -58,6 +58,13 @@ public class HeroUtil {
                     !player.getAbilities().flying &&
                     player.isAlive() &&
                     !player.isTouchingWater() && !player.isOnGround();
+        }
+    }
+    private static boolean checkChargedJump() {
+        if(MinecraftClient.getInstance().options.jumpKey.isPressed() && MinecraftClient.getInstance().options.sneakKey.isPressed()) {
+            return canChargedJump = true;
+        } else {
+            return false;
         }
     }
 }

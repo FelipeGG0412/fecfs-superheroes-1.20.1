@@ -1,5 +1,8 @@
 package com.fecfssuperheroes.mixin;
 
+import com.fecfssuperheroes.item.FecfsItems;
+import com.fecfssuperheroes.item.client.SMSRRenderer;
+import com.fecfssuperheroes.item.client.WebShootersRenderer;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
@@ -39,6 +42,7 @@ public abstract class GeoArmorRendererMixin {
 
     @Shadow protected GeoBone leftBoot;
 
+
     @Inject(at = @At("HEAD"), cancellable = true, method = "applyBoneVisibilityBySlot")
     protected void applyBoneVisibilityBySlot(EquipmentSlot currentSlot, CallbackInfo ci) {
         ci.cancel();
@@ -47,10 +51,13 @@ public abstract class GeoArmorRendererMixin {
         boolean isFirstPerson = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
         boolean isInventoryOpen = screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
         boolean isWearingSuperSuit = HeroUtil.isWearingSuit(MinecraftClient.getInstance().player, FecfsTags.Items.FULLSUIT);
+        GeoArmorRenderer webShooters = new SMSRRenderer();
         if (isFirstPerson && isWearingSuperSuit && !isInventoryOpen) {
             if (currentSlot == EquipmentSlot.CHEST) {
                 this.setBoneVisible(this.rightArm, true);
+            } else if (HeroUtil.isWearingWebShooter(MinecraftClient.getInstance().player)) {
                 this.setBoneVisible(this.leftArm, false);
+                this.setBoneVisible(this.rightArm, true);
             }
         } else {
             switch (currentSlot) {

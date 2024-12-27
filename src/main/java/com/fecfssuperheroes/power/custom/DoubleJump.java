@@ -1,6 +1,6 @@
 package com.fecfssuperheroes.power.custom;
 
-import com.fecfssuperheroes.ability.WebSwinging;
+import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.power.Power;
 import com.fecfssuperheroes.util.FecfsAnimations;
 import com.fecfssuperheroes.util.FecfsTags;
@@ -31,30 +31,38 @@ public class DoubleJump extends Power {
             hasDoubleJumped = false;
             canDoubleJump = false;
         }
-        if (!player.isOnGround() && player.getVelocity().y < 0 && !WebSwinging.isSwinging && !player.getAbilities().flying) {
+        if (!player.isOnGround() && player.getVelocity().y < 0 && !WebSwing.isSwinging && !player.getAbilities().flying) {
             canDoubleJump = true;
         }
     }
 
     public static void doubleJump(PlayerEntity player) {
-        if (player == null) return;
-
-        if (canDoubleJump && !hasDoubleJumped && MinecraftClient.getInstance().options.jumpKey.isPressed()) {
-            player.setVelocity(player.getVelocity().x, .75, player.getVelocity().z);
+        if (canDoubleJump && !hasDoubleJumped) {
+            player.setVelocity(player.getVelocity().x, 0.75, player.getVelocity().z);
             canPlayAnimation = true;
             hasDoubleJumped = true;
             canDoubleJump = false;
         }
     }
+
+    private static boolean wasJumpKeyPressed = false; // Keep track of the key's previous state
+
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
-        if(!HeroUtil.isWearingSuit(client.player, FecfsTags.Items.WEB_SLINGER)) return;
+        if (!HeroUtil.isWearingSuit(client.player, FecfsTags.Items.WEB_SLINGER)) return;
 
         onTick(client.player);
-        doubleJump(client.player);
-        if(canPlayAnimation) {
+
+        boolean isJumpKeyPressed = client.options.jumpKey.isPressed();
+        if (isJumpKeyPressed && !wasJumpKeyPressed) { // Detect key press event
+            doubleJump(client.player);
+        }
+        wasJumpKeyPressed = isJumpKeyPressed;
+
+        if (canPlayAnimation) {
             FecfsAnimations.playSpiderManDoubleJumpAnimation(client.player);
             canPlayAnimation = false;
         }
     }
+
 }

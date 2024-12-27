@@ -1,8 +1,0 @@
-{
-  "sources": [
-    {
-      "type": "single",
-      "resource": "fecfs-superheroes:textures/gui/ability_extender_sprite.png"
-    }
-  ]
-}

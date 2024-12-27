@@ -7,10 +7,9 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 public class FecfsSounds {
-    public static final SoundEvent WEB_SHOOT = registerSoundEvent("web_shoot");
-    public static final SoundEvent WEB_RAIMI = registerSoundEvent("web_raimi");
-    public static final SoundEvent WEB_PROJECTILE = registerSoundEvent("web_projectile");
-    public static final SoundEvent WEB_SHOOT_FAIL = registerSoundEvent("web_shoot_fail");
+    public static final SoundEvent WEB_HIT = registerSoundEvent("web_hit");
+    public static final SoundEvent WEB_SHOOT_RAIMI = registerSoundEvent("web_shoot_raimi");
+    public static final SoundEvent WEB_SHOOT_PROJECTILE_RAIMI = registerSoundEvent("web_shoot_projectile_raimi");
 
     private static SoundEvent registerSoundEvent(String name) {
         Identifier identifier = new Identifier(FecfsSuperheroes.MOD_ID, name);

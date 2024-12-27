@@ -1,6 +1,5 @@
 package com.fecfssuperheroes.event;
 
-import com.fecfssuperheroes.util.FecfsAnimations;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -11,4 +10,5 @@ public class FecfsClientEvents {
 //            FecfsAnimations.playSpiderManDiveAnimation(user);
         }
     }
+
 }

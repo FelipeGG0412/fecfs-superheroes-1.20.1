@@ -1,7 +1,7 @@
 package com.fecfssuperheroes.util;
 
 import com.fecfssuperheroes.FecfsSuperheroes;
-import com.fecfssuperheroes.ability.WebSwinging;
+import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.client.model.WebHitModel;
 import com.fecfssuperheroes.client.web.WebHit;
 import com.fecfssuperheroes.client.web.WebLine;
@@ -20,18 +20,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class RendererUtils {
-
-
-
-
     //Web line rendering
     private static final List<WebLine> activeWebLines = new ArrayList<>();
+    public static double sag;
     public static void addWebLine(Vec3d startPos, Vec3d anchorPoint) {
         activeWebLines.add(new WebLine(startPos, anchorPoint));
     }
@@ -40,46 +39,61 @@ public class RendererUtils {
     public static void renderWebLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, PlayerEntity player, Vec3d anchorPoint, float tickDelta, boolean useBezierCurve) {
         if (player == null || anchorPoint == null) return;
         if (webLineModel == null) {
-            webLineModel = MinecraftClient.getInstance().getEntityModelLoader().getModelPart(new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_line"), "main"));
+            webLineModel = MinecraftClient.getInstance().getEntityModelLoader()
+                    .getModelPart(new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_line"), "main"));
         }
-
         Vec3d webStartPos = getWebStartPosition(player, tickDelta);
         if (webStartPos == null) return;
-
         MinecraftClient client = MinecraftClient.getInstance();
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
-
         int segmentCount = (int) Math.ceil(webStartPos.distanceTo(anchorPoint));
         segmentCount = Math.max(segmentCount, 8);
-
-        Vec3d controlPoint = useBezierCurve ? calculateControlPoint(webStartPos, anchorPoint) : null;
-
-        for (int i = 1; i < segmentCount; i++) {
-            Vec3d startPos = useBezierCurve
-                    ? quadraticBezier(webStartPos, controlPoint, anchorPoint, (double) i / segmentCount)
-                    : linearInterpolation(webStartPos, anchorPoint, (double) i / segmentCount);
-
-            Vec3d endPos = useBezierCurve
-                    ? quadraticBezier(webStartPos, controlPoint, anchorPoint, (double) (i + 1) / segmentCount)
-                    : linearInterpolation(webStartPos, anchorPoint, (double) (i + 1) / segmentCount);
-
-            renderSegment(matrices, vertexConsumers, cameraPos, startPos, endPos);
+        Vec3d controlPoint = null;
+        if (useBezierCurve) {
+            controlPoint = calculateControlPoint(webStartPos, anchorPoint, player);
+        }
+        for (int i = 2; i < segmentCount + 2; i++) {
+            double tStart = (double) i / segmentCount;
+            double tEnd = (double) (i + 1) / segmentCount;
+            Vec3d startPosSegment;
+            Vec3d endPosSegment;
+            if (useBezierCurve) {
+                startPosSegment = quadraticBezier(webStartPos, controlPoint, anchorPoint, tStart);
+                endPosSegment = quadraticBezier(webStartPos, controlPoint, anchorPoint, tEnd);
+            } else {
+                startPosSegment = linearInterpolation(webStartPos, anchorPoint, tStart);
+                endPosSegment = linearInterpolation(webStartPos, anchorPoint, tEnd);
+            }
+            renderSegment(matrices, vertexConsumers, cameraPos, startPosSegment, endPosSegment);
         }
     }
+    private static Vec3d linearInterpolation(Vec3d start, Vec3d end, double t) {return start.lerp(end, t);}
     public static Vec3d getWebStartPosition(PlayerEntity player, float tickDelta) {
         if (player != null) {
+            Vec3d playerPos = player.getLerpedPos(tickDelta);
             if (MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) {
-                return MinecraftClient.getInstance().gameRenderer.getCamera().getPos()
-                        .add(player.getMainArm() == Arm.RIGHT ? 0.3 : -0.3, -0.25, -0.5);
+                Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+                Vec3d cameraDir = player.getRotationVec(tickDelta);
+                double distanceFromCamera = 0.5;
+
+                return cameraPos.add(cameraDir.multiply(distanceFromCamera)).add(0.75, -0.2, 0);
             } else {
-                Vec3d playerPos = player.getLerpedPos(tickDelta);
-                return new Vec3d(playerPos.x, playerPos.y + player.getStandingEyeHeight() + 0.5, playerPos.z);
+                double yOffset = player.getStandingEyeHeight() + 0.2;
+                return new Vec3d(playerPos.x, playerPos.y + yOffset, playerPos.z);
             }
         }
         return null;
     }
-    private static Vec3d calculateControlPoint(Vec3d start, Vec3d end) {
-        return start.lerp(end, 0.5).add(0, -Math.min(5, start.distanceTo(end) * 0.2), 0);
+    private static Vec3d calculateControlPoint(Vec3d start, Vec3d end, PlayerEntity player) {
+        double distance = start.distanceTo(end);
+        double sagAmount;
+        if (player.isOnGround() || player.isClimbing() || distance < 5.0) {
+            sagAmount = 0.0;
+        } else {
+            sagAmount = Math.min(5.0, distance * 0.1);
+        }
+        Vec3d midPoint = start.lerp(end, 0.5);
+        return midPoint.add(0, -sagAmount, 0);
     }
     private static Vec3d quadraticBezier(Vec3d p0, Vec3d p1, Vec3d p2, double t) {
         return new Vec3d(
@@ -88,11 +102,10 @@ public class RendererUtils {
                 (1 - t) * (1 - t) * p0.z + 2 * (1 - t) * t * p1.z + t * t * p2.z);
     }
     private static void renderSegment(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos, Vec3d startPos, Vec3d endPos) {
-        if(webLineModel == null) return;
-        if(MinecraftClient.getInstance().player == null) return;
+        if (webLineModel == null) return;
+
         Vec3d segmentVec = endPos.subtract(startPos);
         float segmentLengthF = (float) segmentVec.length();
-
         if (segmentLengthF < 1e-6) return;
         float modelRotationOffset = -((float) Math.PI / 2);
         Vec3d dir = segmentVec.normalize();
@@ -101,15 +114,14 @@ public class RendererUtils {
         double dz = dir.z;
         float yaw = (float) Math.atan2(-dx, dz);
         float pitch = (float) Math.asin(-dy);
+
         matrices.push();
         matrices.translate(startPos.x - cameraPos.x, startPos.y - cameraPos.y, startPos.z - cameraPos.z);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation(-yaw));
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch + modelRotationOffset));
         matrices.scale(1.0F, segmentLengthF, 1.0F);
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(
-                new Identifier(FecfsSuperheroes.MOD_ID, "textures/entity/web_line.png")));
-        webLineModel.render(matrices, vertexConsumer, MinecraftClient.getInstance().player.getWorld().isNight() ?
-                LightmapTextureManager.MAX_LIGHT_COORDINATE / 1000 : LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(WEB_TEXTURE));
+        webLineModel.render(matrices, vertexConsumer, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
 
         matrices.pop();
     }
@@ -117,19 +129,32 @@ public class RendererUtils {
         if (activeWebLines.isEmpty()) return;
         long currentTime = System.currentTimeMillis();
         Iterator<WebLine> iterator = activeWebLines.iterator();
+
         while (iterator.hasNext()) {
             WebLine webLine = iterator.next();
             long elapsed = currentTime - webLine.startTime;
-            if (elapsed > 3000) {
+            sag = calculateSag(elapsed);
+            if (elapsed > 5000) {
                 iterator.remove();
                 continue;
             }
             float alpha = 1.0f;
-            if (elapsed > 2000) {
-                alpha = 1.0f - ((elapsed - 2000) / 1000.0f);
+            if (elapsed > 4000) {
+                alpha = 1.0f - ((float)(elapsed - 4000) / 1000.0f);
             }
+
+
             renderWebLineInstance(matrices, vertexConsumers, webLine, alpha);
         }
+    }
+    private static Vec3d calculateControlPointWithSag(Vec3d start, Vec3d end, double sag) {
+        Vec3d midPoint = start.lerp(end, 0.5);
+        return midPoint.add(0, -sag, 0);
+    }
+    private static double calculateSag(long elapsedTime) {
+        double maxSag = 5.0;
+        double sag = (elapsedTime / 5000.0) * maxSag;
+        return Math.min(sag, maxSag);
     }
     private static void renderWebLineInstance(MatrixStack matrices, VertexConsumerProvider vertexConsumers, WebLine webLine, float alpha) {
         if (webLineModel == null) {
@@ -141,31 +166,36 @@ public class RendererUtils {
         Vec3d endPos = webLine.anchorPoint;
         int segmentCount = (int) Math.ceil(startPos.distanceTo(endPos));
         segmentCount = Math.max(segmentCount, 8);
-        for (int i = 1; i < segmentCount; i++) {
-            Vec3d segmentStart = linearInterpolation(startPos, endPos, (double) i / segmentCount);
-            Vec3d segmentEnd = linearInterpolation(startPos, endPos, (double) (i + 1) / segmentCount);
+        Vec3d controlPoint = calculateControlPointWithSag(startPos, endPos, sag);
+
+        for (int i = 2; i < segmentCount; i++) {
+            double tStart = (double) i / segmentCount;
+            double tEnd = (double) (i + 1) / segmentCount;
+
+            Vec3d segmentStart = quadraticBezier(startPos, controlPoint, endPos, tStart);
+            Vec3d segmentEnd = quadraticBezier(startPos, controlPoint, endPos, tEnd);
 
             renderSegmentWithAlpha(matrices, vertexConsumers, cameraPos, segmentStart, segmentEnd, alpha);
         }
     }
-    private static Vec3d linearInterpolation(Vec3d start, Vec3d end, double t) {
-        return start.lerp(end, t);
-    }
     private static void renderSegmentWithAlpha(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos, Vec3d startPos, Vec3d endPos, float alpha) {
-        if (webLineModel == null) return;
+        if (MinecraftClient.getInstance().player == null) return;
         Vec3d segmentVec = endPos.subtract(startPos);
         float segmentLength = (float) segmentVec.length();
         if (segmentLength < 1e-6) return;
-        float modelRotationOffset = -((float) Math.PI / 2);
-        Vec3d dir = segmentVec.normalize();
-        float yaw = (float) Math.atan2(-dir.x, dir.z);
-        float pitch = (float) Math.asin(-dir.y);
         matrices.push();
         matrices.translate(startPos.x - cameraPos.x, startPos.y - cameraPos.y, startPos.z - cameraPos.z);
+        Vec3d dir = segmentVec.normalize();
+        double dx = dir.x;
+        double dy = dir.y;
+        double dz = dir.z;
+        float modelRotationOffset = -((float) Math.PI / 2);
+        float yaw = (float) Math.atan2(-dx, dz);
+        float pitch = (float) Math.asin(-dy);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation(-yaw));
         matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch + modelRotationOffset));
         matrices.scale(1.0F, segmentLength, 1.0F);
-        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(WEB_TEXTURE));
+        VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(WEB_TEXTURE));
         webLineModel.render(matrices, vertexConsumer, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, 1.0f, 1.0f, 1.0f, alpha);
         matrices.pop();
     }
@@ -188,22 +218,16 @@ public class RendererUtils {
         }
     }
 
-
-
-
-
     //Web hit rendering
-    private static final int MAX_WEB_HITS = 64;
+    private static final int MAX_WEB_HITS = 32;
     private static final WebHit[] activeWebHits = new WebHit[MAX_WEB_HITS];
     private static int webHitIndex = 0;
     private static final Identifier WEB_HIT_TEXTURE = new Identifier(FecfsSuperheroes.MOD_ID, "textures/entity/web_hit.png");
     private static WebHitModel webHitModel = null;
-
     public static void showWebHit(Vec3d anchorPoint, Direction facing) {
         activeWebHits[webHitIndex++] = new WebHit(anchorPoint, facing);
         if (webHitIndex >= MAX_WEB_HITS) webHitIndex = 0;
     }
-
     public static void renderWebHits(WorldRenderContext context) {
         long currentTime = System.currentTimeMillis();
         for (WebHit webHit : activeWebHits) {
@@ -211,17 +235,16 @@ public class RendererUtils {
                 continue;
             }
             long elapsed = currentTime - webHit.startTime;
-            if (elapsed > 4000) {
+            if (elapsed > 5000) {
                 continue;
             }
             float alpha = 1.0f;
-            if (elapsed > 3000) {
+            if (elapsed > 4000) {
                 alpha = 1.0f - ((elapsed - 3000) / 1000.0f);
             }
             renderWebHitInstance(context, webHit, alpha);
         }
     }
-
     private static void renderWebHitInstance(WorldRenderContext context, WebHit webHit, float alpha) {
         if (webHitModel == null) {
             EntityModelLayer webHitLayer = new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_hit"), "main");
@@ -235,7 +258,7 @@ public class RendererUtils {
         Vec3d offset = Vec3d.of(webHit.facing.getVector()).multiply(0.1);
         matrices.translate(
                 webHit.position.x - camera.getPos().x + offset.x,
-                webHit.position.y - camera.getPos().y + offset.y - (WebSwinging.isSwinging ? 2 : 1),
+                webHit.position.y - camera.getPos().y + offset.y - (WebSwing.isSwinging ? 2 : 1),
                 webHit.position.z - camera.getPos().z + offset.z
         );
 
@@ -268,11 +291,6 @@ public class RendererUtils {
 
         matrices.pop();
     }
-
-
-
-
-
 
     //Armor mixin visibility methods
     public static void headVisibility(AbstractClientPlayerEntity player, float scale, PlayerEntityModel<AbstractClientPlayerEntity> model) {

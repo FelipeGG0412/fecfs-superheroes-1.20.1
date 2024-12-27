@@ -1,13 +1,10 @@
 package com.fecfssuperheroes.item.custom;
 
-import com.fecfssuperheroes.ability.WebSwinging;
 import com.fecfssuperheroes.item.client.SMSRRenderer;
-import com.fecfssuperheroes.power.custom.DoubleJump;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ItemStack;

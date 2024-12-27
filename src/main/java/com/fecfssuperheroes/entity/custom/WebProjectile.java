@@ -1,8 +1,10 @@
 package com.fecfssuperheroes.entity.custom;
 
 import com.fecfssuperheroes.entity.FecfsEntities;
+import com.fecfssuperheroes.sound.FecfsSounds;
 import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -21,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -46,7 +49,7 @@ public class WebProjectile extends PersistentProjectileEntity {
         super(FecfsEntities.WEB_PROJECTILE_ENTITY, world);
         setOwner(player);
         double d0 = player.getX();
-        double d1 = player.getY() + 1.3;
+        double d1 = player.getY() + 1.2;
         double d2 = player.getZ() + 0.25;
         this.refreshPositionAndAngles(d0, d1, d2, this.getYaw(), this.getPitch());
     }
@@ -84,7 +87,7 @@ public class WebProjectile extends PersistentProjectileEntity {
         } else if (this.isInsideWaterOrBubbleColumn()) {
             this.discard();
         } else {
-            this.setVelocity(vec3.multiply(0.99F));
+            this.setVelocity(vec3.multiply(0.9995F));
             this.setPos(d0, d1, d2);
         }
     }
@@ -144,6 +147,10 @@ public class WebProjectile extends PersistentProjectileEntity {
     protected void onBlockHit(BlockHitResult blockHitResult) {
         Vec3d hitPos = blockHitResult.getPos();
         Direction facing = blockHitResult.getSide();
+        Vec3d blockPosVec = Vec3d.ofCenter(blockHitResult.getBlockPos());
+        float volume = this.getOwner() instanceof PlayerEntity player ?
+                (float) Math.max(1 - Math.min(player.getPos().distanceTo(blockPosVec) / 30, 1.0), 0) : 1f;
+        this.getWorld().playSound(null, blockHitResult.getBlockPos(), FecfsSounds.WEB_HIT, SoundCategory.PLAYERS, volume, 1f);
         RendererUtils.showWebHit(hitPos, facing);
         this.discard();
     }
