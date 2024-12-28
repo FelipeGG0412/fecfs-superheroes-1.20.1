@@ -70,7 +70,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
                 matrices.translate(0, 0.01f, 0);
                 ArmorRenderer.renderPart(matrices, vertexConsumers, light, chestStack, armorRenderer, getArmorTexture());
                 matrices.pop();
-                ci.cancel(); // Prevent further rendering
+                ci.cancel();
             }
         }
     }

@@ -12,14 +12,13 @@ import com.fecfssuperheroes.util.HeroUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Arm;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-
-import static com.fecfssuperheroes.util.FecfsAnimations.*;
+import net.minecraft.world.WorldEvents;
 
 @Environment(EnvType.CLIENT)
 public class WebSwing {
@@ -37,6 +36,8 @@ public class WebSwing {
     public static int swingDuration = 0;
     public static Direction anchorFacing = null;
     public static boolean swingModeToggled = false;
+    public static Arm currentSwingArm = Arm.RIGHT;
+
 
     public static Arm swingHand(PlayerEntity player) {
         return player.getMainArm();
@@ -54,14 +55,14 @@ public class WebSwing {
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null && anchorPoint != null) {
-                RendererUtils.renderWebLine(context.matrixStack(), context.consumers(), player, anchorPoint, context.tickDelta(), true);
+                RendererUtils.renderWebLine(context.matrixStack(), context.consumers(), player, anchorPoint, anchorFacing, context.tickDelta(), true);
                 RendererUtils.renderWebHits(context);
             }
         });
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                RendererUtils.renderPastWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
+                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
             }
         });
     }
@@ -155,7 +156,7 @@ public class WebSwing {
     }
 
     public static void stopSwinging(PlayerEntity player) {
-        Vec3d webStartPos = RendererUtils.getWebStartPosition(player, 0);
+        Vec3d webStartPos = RendererUtils.webStartPosition(player, 0);
         RendererUtils.addWebLine(webStartPos, anchorPoint);
         if (webStartPos != null && anchorPoint != null) RendererUtils.addWebLine(webStartPos, anchorPoint);
         isSwinging = false;
@@ -172,6 +173,8 @@ public class WebSwing {
             player.getAbilities().allowFlying = true;
         }
         player.setJumping(true);
+        currentSwingArm = null;
+
 
     }
 

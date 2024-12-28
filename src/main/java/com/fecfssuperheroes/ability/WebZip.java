@@ -1,8 +1,6 @@
 package com.fecfssuperheroes.ability;
 
 import com.fecfssuperheroes.networking.FecfsNetworking;
-import com.fecfssuperheroes.sound.FecfsSounds;
-import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -11,7 +9,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
@@ -33,21 +30,14 @@ public class WebZip {
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                RendererUtils.renderWebLine(
-                        context.matrixStack(),
-                        context.consumers(),
-                        player,
-                        anchorPoint,
-                        context.tickDelta(),
-                        false
-                );
+                RendererUtils.renderWebLine(context.matrixStack(), context.consumers(), player, anchorPoint, anchorFacing, context.tickDelta(), true);
                 RendererUtils.renderWebHits(context);
             }
         });
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                RendererUtils.renderPastWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
+                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
             }
         });
     }
@@ -95,7 +85,7 @@ public class WebZip {
     }
     private static void stopZip() {
         if (MinecraftClient.getInstance().player != null && anchorPoint != null) {
-            Vec3d webStartPos = RendererUtils.getWebStartPosition(MinecraftClient.getInstance().player, 0);
+            Vec3d webStartPos = RendererUtils.webStartPosition(MinecraftClient.getInstance().player, 0);
             if (webStartPos != null) {
                 RendererUtils.addWebLine(webStartPos, anchorPoint);
             }

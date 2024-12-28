@@ -35,7 +35,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                 drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityOne(), 17, 16, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
 
@@ -45,7 +45,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                 drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityOne(), 17, 16, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
 
@@ -88,7 +88,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                 drawContext.drawTexture(keybindingSlot, 10, 70, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 76, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityTwo(), 17, 76, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 76, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
             } else {
@@ -96,7 +96,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                 drawContext.drawTexture(keybindingSlot, 10, 70, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 76, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityTwo(), 17, 76, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 76, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
             }
@@ -105,7 +105,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                 drawContext.drawTexture(keybindingSlot, 10, 94, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 100, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityThree(), 17, 100, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 100, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
             } else {
@@ -113,7 +113,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                 drawContext.drawTexture(keybindingSlot, 10, 94, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 100, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityThree(), 17, 100, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 100, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
             }
@@ -124,7 +124,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                 keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_cooldown.png");
                 drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
+                drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityOne(), 17, 16, 0xFFFFFF, true);
                 drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
                 drawContext.getMatrices().pop();
 
@@ -135,7 +135,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                     drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityOne(), 17, 16, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
@@ -145,7 +145,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                     drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityOne(), 17, 16, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
@@ -156,7 +156,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                     drawContext.drawTexture(keybindingSlot, 10, 34, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 40, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityTwo(), 17, 40, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 40, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
@@ -166,7 +166,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                     drawContext.drawTexture(keybindingSlot, 10, 34, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 40, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityTwo(), 17, 40, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 40, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
@@ -177,7 +177,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
                     drawContext.drawTexture(keybindingSlot, 10, 58, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 64, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityThree(), 17, 64, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 64, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
@@ -187,7 +187,7 @@ public class RaimiScreen extends InGameHud implements HudRenderCallback {
                     drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
                     keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
                     drawContext.drawTexture(keybindingSlot, 10, 58, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 64, 0xFFFFFF, true);
+                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, FecfsKeyInputHandler.getKeyAbilityThree(), 17, 64, 0xFFFFFF, true);
                     drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 64, 0xFFFFFF, true);
                     drawContext.getMatrices().pop();
 
