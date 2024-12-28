@@ -152,10 +152,12 @@ public class RendererUtils {
         return midPoint.add(0, -sag, 0);
     }
     private static double calculateSag(long elapsedTime) {
-        double maxSag = 5.0;
-        double sag = (elapsedTime / 5000.0) * maxSag;
+        double maxSag = 25.0;
+        double normalizedTime = (double) elapsedTime / 5000.0;
+        double sag = maxSag * (1 - Math.exp(-3 * normalizedTime));
         return Math.min(sag, maxSag);
     }
+
     private static void renderWebLineInstance(MatrixStack matrices, VertexConsumerProvider vertexConsumers, WebLine webLine, float alpha) {
         if (webLineModel == null) {
             webLineModel = MinecraftClient.getInstance().getEntityModelLoader().getModelPart(new EntityModelLayer(new Identifier(FecfsSuperheroes.MOD_ID, "web_line"), "main"));

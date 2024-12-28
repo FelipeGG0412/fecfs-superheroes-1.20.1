@@ -17,7 +17,8 @@ public class ChargeJump {
     private static final float MAX_JUMP_VELOCITY = 3.5f;
 
     public static int chargeTime = 0;
-    private boolean isCharging = false;
+    public boolean isCharging = false;
+    public static boolean charging = false;
     private boolean startedWhileSprinting = false;
 
     private static boolean canChargeJump(PlayerEntity player) {
@@ -29,6 +30,7 @@ public class ChargeJump {
     public void startCharging(PlayerEntity player, boolean isSprinting) {
         if(!canChargeJump(player)) return;
         this.isCharging = true;
+        charging = true;
         this.chargeTime = 0;
         this.startedWhileSprinting = isSprinting;
     }
@@ -37,6 +39,7 @@ public class ChargeJump {
         if(!canChargeJump(player)) return;
         if (this.isCharging) {
             this.isCharging = false;
+            charging = false;
 
             if (chargeTime < 5) {
                 player.jump();
@@ -73,6 +76,7 @@ public class ChargeJump {
     public void cancelCharge(PlayerEntity player) {
         if(!canChargeJump(player) || !player.isOnGround()) {
             this.isCharging = false;
+            charging = false;
         }
     }
 

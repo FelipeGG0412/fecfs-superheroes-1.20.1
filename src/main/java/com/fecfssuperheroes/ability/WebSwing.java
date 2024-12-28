@@ -68,7 +68,6 @@ public class WebSwing {
 
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
-        client.player.sendMessage(Text.literal("Swing = "+swingModeToggled), true);
         if (isCooldownActive) {
             if (cooldownTicks > 0) cooldownTicks--;
             else isCooldownActive = false;
