@@ -23,7 +23,7 @@ public enum FecfsArmorMaterials implements ArmorMaterial {
         map.put(ArmorItem.Type.LEGGINGS, 10);
         map.put(ArmorItem.Type.CHESTPLATE, 10);
         map.put(ArmorItem.Type.HELMET, 10);
-    }), 0, SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE, 0f, 0f, () -> Ingredient.ofItems(Items.AIR));
+    }), 0, SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE, 0f, 0f, () -> Ingredient.ofItems(Items.AIR)),;
 
     public static final StringIdentifiable.Codec<ArmorMaterials> CODEC = StringIdentifiable.createCodec(ArmorMaterials::values);
     private static final EnumMap<ArmorItem.Type, Integer> BASE_DURABILITY = Util.make(new EnumMap(ArmorItem.Type.class), (map) -> {

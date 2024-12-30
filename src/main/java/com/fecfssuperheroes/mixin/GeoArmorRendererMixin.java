@@ -10,6 +10,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.text.Text;
+import net.minecraft.util.Arm;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,13 +53,15 @@ public abstract class GeoArmorRendererMixin {
         boolean isFirstPerson = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
         boolean isInventoryOpen = screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
         boolean isWearingSuperSuit = HeroUtil.isWearingSuit(MinecraftClient.getInstance().player, FecfsTags.Items.FULLSUIT);
-        GeoArmorRenderer webShooters = new SMSRRenderer();
         if (isFirstPerson && isWearingSuperSuit && !isInventoryOpen) {
             if (currentSlot == EquipmentSlot.CHEST) {
-                this.setBoneVisible(this.rightArm, true);
-            } else if (HeroUtil.isWearingWebShooter(MinecraftClient.getInstance().player)) {
-                this.setBoneVisible(this.leftArm, false);
-                this.setBoneVisible(this.rightArm, true);
+                if(MinecraftClient.getInstance().player.getMainArm().equals(Arm.RIGHT)) {
+                    this.setBoneVisible(this.leftArm, false);
+                    this.setBoneVisible(this.rightArm, true);
+                } else {
+                    this.setBoneVisible(this.leftArm, true);
+                    this.setBoneVisible(this.rightArm, false);
+                }
             }
         } else {
             switch (currentSlot) {

@@ -3,7 +3,6 @@ package com.fecfssuperheroes.mixin;
 import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.util.FecfsAnimations;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,6 +23,8 @@ public abstract class PlayerEntityMixin {
     private void onTick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (!player.getWorld().isClient) return;
+
+        // Track the start of a fall
         if (!player.isOnGround() && player.getVelocity().y < 0) {
             if (!isFalling) {
                 isFalling = true;
@@ -31,18 +32,16 @@ public abstract class PlayerEntityMixin {
                 startY = player.getY();
             }
         }
+
+        // Handle landing logic
         if (player.isOnGround() && isFalling) {
             isFalling = false;
             double fallDistance = Math.max(player.fallDistance, startY - player.getY());
+
             if (fallDistance >= 10 && !hasPlayedLandingAnimation) {
                 hasPlayedLandingAnimation = true;
-                FecfsAnimations.playSpiderManLandingAnimation(player);
+                FecfsAnimations.playSpiderManLandingAnimation(player); // Play landing animation
             }
         }
-    }
-
-    @ModifyReturnValue(method = "isBlockBreakingRestricted", at = @At("TAIL"))
-    private boolean isBlockBreakingRestricted(boolean original) {
-        return original || WebSwing.isSwinging || WebZip.isZipping();
     }
 }

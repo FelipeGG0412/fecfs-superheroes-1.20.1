@@ -27,27 +27,7 @@ public class WebShootersScreen extends InGameHud implements HudRenderCallback {
         Identifier leftClick;
         Identifier rightClick;
         if(a) {
-            if(FecfsKeyInputHandler.abilityOne.isPressed()) {
-
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-
-            } else {
-
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-
-            }
+            ScreenUtils.drawScreen(drawContext, 10, 10, FecfsKeyInputHandler.abilityOne, "Toggle Swing");
 
             if (MinecraftClient.getInstance().options.useKey.isPressed()) {
                 drawContext.getMatrices().push();
@@ -81,116 +61,13 @@ public class WebShootersScreen extends InGameHud implements HudRenderCallback {
                 drawContext.getMatrices().pop();
             }
 
-            if(FecfsKeyInputHandler.abilityTwo.isPressed()) {
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                drawContext.drawTexture(keybindingSlot, 10, 70, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 76, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 76, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-            } else {
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                drawContext.drawTexture(keybindingSlot, 10, 70, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 76, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 76, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-            }
-            if(FecfsKeyInputHandler.abilityThree.isPressed()) {
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                drawContext.drawTexture(keybindingSlot, 10, 94, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 100, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 100, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-            } else {
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                drawContext.drawTexture(keybindingSlot, 10, 94, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 100, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 100, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-            }
+            ScreenUtils.drawScreen(drawContext, 10, 70, FecfsKeyInputHandler.abilityTwo, "Web-Zip");
+            ScreenUtils.drawScreen(drawContext, 10, 94, FecfsKeyInputHandler.abilityThree, "Web Shoot");
+
         } else {
-            if(WebSwing.isSwingOnCooldown()) {
-
-                drawContext.getMatrices().push();
-                drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_cooldown.png");
-                drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
-                drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
-                drawContext.getMatrices().pop();
-
-            } else {
-                if(FecfsKeyInputHandler.abilityOne.isPressed()) {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                } else {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 10, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "R", 17, 16, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Toggle Web-Swing", 32, 16, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                }
-                if(FecfsKeyInputHandler.abilityTwo.isPressed()) {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 34, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 40, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 40, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                } else {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 34, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "V", 17, 40, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Web-Zip", 32, 40, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                }
-                if(FecfsKeyInputHandler.abilityThree.isPressed()) {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot_pressed.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 58, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 64, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 64, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                } else {
-
-                    drawContext.getMatrices().push();
-                    drawContext.getMatrices().scale(1.05f, 1.05f, 1.05f);
-                    keybindingSlot = new Identifier(FecfsSuperheroes.MOD_ID, "textures/gui/slot.png");
-                    drawContext.drawTexture(keybindingSlot, 10, 58, 0, 0, 20, 20, 20, 20);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "G", 17, 64, 0xFFFFFF, true);
-                    drawContext.drawText(MinecraftClient.getInstance().textRenderer, "Shoot web", 32, 64, 0xFFFFFF, true);
-                    drawContext.getMatrices().pop();
-
-                }
-            }
+            ScreenUtils.drawScreen(drawContext, 10, 10, FecfsKeyInputHandler.abilityOne, "Toggle Swing");
+            ScreenUtils.drawScreen(drawContext, 10, 34, FecfsKeyInputHandler.abilityTwo, "Web-Zip");
+            ScreenUtils.drawScreen(drawContext, 10, 58, FecfsKeyInputHandler.abilityThree, "Web Shoot");
         }
 
     }

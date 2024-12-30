@@ -1,5 +1,6 @@
 package com.fecfssuperheroes;
 
+import com.fecfssuperheroes.ability.Diving;
 import com.fecfssuperheroes.ability.Evade;
 import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.ability.WebZip;
@@ -46,9 +47,7 @@ public class FecfsSuperheroesClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(WebSwing::onClientTick);
         ClientTickEvents.END_CLIENT_TICK.register(DoubleJump::onClientTick);
-
-//        ClientTickEvents.END_CLIENT_TICK.register(WallCrawl::onClientTick);
-
+        ClientTickEvents.END_CLIENT_TICK.register(Diving::onClientTick);
         ClientTickEvents.END_CLIENT_TICK.register(FecfsClientEvents::animationTickEvents);
 
         EntityModelLayerRegistry.registerModelLayer(FecfsModelLayers.WEB_PROJECTILE, WebProjectileModel::getTexturedModelData);

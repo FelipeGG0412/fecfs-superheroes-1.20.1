@@ -25,7 +25,12 @@ public class FecfsPowers {
 
         TagKey<Item> spiderManTag = FecfsTags.Items.SPIDERMAN;
 
-        List<Power> spiderManPowers = List.of(
+        List<Power> spiderManPowers = spiderManPowers();
+
+        PowerUtil.registerArmorPowers(spiderManTag, spiderManPowers);
+    }
+    public static List<Power> spiderManPowers() {
+        return List.of(
                 new Strength(2),
                 new Speed(3),
                 new Jump(3),
@@ -34,7 +39,5 @@ public class FecfsPowers {
                 new FallResistance(75),
                 new Resistance(60)
         );
-
-        PowerUtil.registerArmorPowers(spiderManTag, spiderManPowers);
     }
 }

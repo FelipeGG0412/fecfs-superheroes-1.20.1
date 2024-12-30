@@ -3,7 +3,7 @@ package com.fecfssuperheroes.ability;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
-public class Evade {
+public class Evade  {
     private static boolean isDodging = false;
     private static boolean cooldown = false;
     public static boolean hasDodged = false;
@@ -13,13 +13,15 @@ public class Evade {
     private static final int DODGE_COOLDOWN = 20;
     private static final int DODGE_DURATION = 20;
 
-
     public static void performEvade(PlayerEntity player) {
         if (player == null) return;
         if(!player.isOnGround() && !player.getAbilities().flying && player.isAlive() && !WebSwing.isSwinging && !WebZip.isZipping()) return;
         int currentTime = player.age;
         if (currentTime - lastDodgeTime < DODGE_COOLDOWN) {
             return;
+        }
+        if (Diving.isDiving) {
+            Diving.stopDive(player);
         }
         Vec3d dodgeDirection = getMovementInputDirection(player);
         if (dodgeDirection.lengthSquared() == 0) {

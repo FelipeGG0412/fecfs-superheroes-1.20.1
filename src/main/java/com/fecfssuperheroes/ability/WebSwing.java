@@ -31,13 +31,14 @@ public class WebSwing {
     private static int swingTime = 0;
     public static Vec3d anchorPoint = null;
     private static double webLength = 0;
-    private static final double MAX_SPEED = 2.5;
     private static Vec3d swingPlaneNormal = Vec3d.ZERO;
     public static int swingDuration = 0;
+    public static long swingStartTime;
     public static Direction anchorFacing = null;
     public static boolean swingModeToggled = false;
     public static Arm currentSwingArm = Arm.RIGHT;
-
+    private static boolean wasDiving = false;
+    private static final double MAX_SPEED = 3.75;
 
     public static Arm swingHand(PlayerEntity player) {
         return player.getMainArm();
@@ -62,7 +63,7 @@ public class WebSwing {
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
+                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers());
             }
         });
     }
@@ -77,9 +78,15 @@ public class WebSwing {
     }
 
     public static void startSwing(PlayerEntity player) {
+        if(!isSwinging && Diving.isDiving) {
+            wasDiving = true;
+        }
         if (HeroUtil.canUseWeb(player, true) && !isCooldownActive) {
             BlockHitResult hitRes = HeroUtil.raycast(player, HeroUtil.isWearingWebShooter(player) ? 100 : 150);
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK && swingHand(player) != null) {
+                if (Diving.isDiving) {
+                    Diving.stopDive(player);
+                }
                 anchorPoint = hitRes.getPos();
                 anchorFacing = hitRes.getSide();
                 RendererUtils.showWebHit(anchorPoint, anchorFacing);
@@ -99,6 +106,8 @@ public class WebSwing {
                 if(isSwinging) {
                     MinecraftClient.getInstance().getSoundManager().play(new WebSwingingSoundInstance(MinecraftClient.getInstance().player));
                 }
+                swingStartTime = System.currentTimeMillis();
+
             }
         }
     }
@@ -118,16 +127,17 @@ public class WebSwing {
         Vec3d playerPos = player.getPos();
         Vec3d toAnchor = anchorPoint.subtract(playerPos);
         double distanceToAnchor = toAnchor.length();
+        double boostedSpeed = Diving.isDiving ? MAX_SPEED : 2.5;
         if (distanceToAnchor > webLength) {
             Vec3d radialDirection = toAnchor.normalize();
             Vec3d tangentialVelocity = player.getVelocity().subtract(radialDirection.multiply(player.getVelocity().dotProduct(radialDirection)));
-            player.setVelocity(tangentialVelocity.add(new Vec3d(0, -0.08, 0)).multiply(0.9935));
+            player.setVelocity(tangentialVelocity.add(new Vec3d(0, -0.08, 0)).multiply(0.9935).normalize().multiply(boostedSpeed));
             applyPlayerInput(player);
         } else {
             player.setVelocity(player.getVelocity().add(0, -0.08, 0));
             applyPlayerInput(player);
-            if (player.getVelocity().length() > MAX_SPEED)
-                player.setVelocity(player.getVelocity().normalize().multiply(MAX_SPEED));
+            if (player.getVelocity().length() > (wasDiving ? 3.75 : 2.5))
+                player.setVelocity(player.getVelocity().normalize().multiply(wasDiving ? 3.75 : 2.5));
         }
     }
 
@@ -135,8 +145,8 @@ public class WebSwing {
         Vec3d input = getMovementInput(player) != null ? getMovementInput(player) : Vec3d.ZERO;
         if(input == null) return;
         player.setVelocity(player.getVelocity().add(input.multiply(0.045)));
-        if (player.getVelocity().length() > MAX_SPEED)
-            player.setVelocity(player.getVelocity().normalize().multiply(MAX_SPEED));
+        if (player.getVelocity().length() > (wasDiving ? 3.75 : 2.5))
+            player.setVelocity(player.getVelocity().normalize().multiply(wasDiving ? 3.75 : 2.5));
     }
 
     private static Vec3d getMovementInput(PlayerEntity player) {
@@ -183,7 +193,7 @@ public class WebSwing {
         Vec3d forwardDirection = player.getRotationVector().normalize();
         Vec3d boostVelocity = forwardDirection.multiply(1.5).add(0, 1.5, 0);
         player.setVelocity(player.getVelocity().add(boostVelocity));
-        if (player.getVelocity().length() > MAX_SPEED)
-            player.setVelocity(player.getVelocity().normalize().multiply(MAX_SPEED));
+        if (player.getVelocity().length() > (wasDiving ? 3.75 : 2.5))
+            player.setVelocity(player.getVelocity().normalize().multiply(wasDiving ? 3.75 : 2.5));
     }
 }

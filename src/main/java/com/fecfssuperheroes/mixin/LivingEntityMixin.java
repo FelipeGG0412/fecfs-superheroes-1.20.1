@@ -29,8 +29,6 @@ public abstract class LivingEntityMixin extends Entity implements Attackable {
         return original + (Jump.jump ? 0.1f * (Jump.getCurrentAmplifier() + 1f) : 0);
     }
 
-    @Unique
-    private ChargeJump chargedJump = new ChargeJump();
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
@@ -45,13 +43,13 @@ public abstract class LivingEntityMixin extends Entity implements Attackable {
                     (isSneaking && isSpacePressed) ||
                     (isSprinting && isSpacePressed)) {
 
-                if (!chargedJump.isCharging()) {
-                    chargedJump.startCharging(player, isSprinting);
+                if (!ChargeJump.charging) {
+                    ChargeJump.startCharging(player, isSprinting);
                 }
-                chargedJump.tick(player);
+                ChargeJump.tick(player);
                 player.setJumping(false);
-            } else if (chargedJump.isCharging()) {
-                chargedJump.stopCharging(player);
+            } else if (ChargeJump.isCharging) {
+                ChargeJump.stopCharging(player);
             }
         }
     }
@@ -60,7 +58,7 @@ public abstract class LivingEntityMixin extends Entity implements Attackable {
     private void onJump(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         if (entity instanceof PlayerEntity player) {
-            if (chargedJump.isCharging()) {
+            if (ChargeJump.isCharging) {
                 ci.cancel();
                 return;
             }

@@ -1,6 +1,7 @@
 package com.fecfssuperheroes.ability;
 
 import com.fecfssuperheroes.networking.FecfsNetworking;
+import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -24,7 +25,6 @@ public class WebZip {
     private static int zipTickCounter = 0;
     public static Direction anchorFacing = null;
 
-
     public static void register() {
         ClientTickEvents.START_CLIENT_TICK.register(WebZip::onClientTick);
         WorldRenderEvents.BEFORE_ENTITIES.register(context -> {
@@ -37,7 +37,7 @@ public class WebZip {
         WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
-                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers(), context.tickDelta());
+                RendererUtils.renderUsedWebLines(context.matrixStack(), context.consumers());
             }
         });
     }
@@ -46,6 +46,9 @@ public class WebZip {
         if (HeroUtil.canUseWeb(player, true) && zipCooldown == 0) {
             BlockHitResult hitRes = HeroUtil.raycast(player, (HeroUtil.isWearingWebShooter(player) ? 100 : 150));
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK) {
+                if (Diving.isDiving) {
+                    Diving.stopDive(player);
+                }
                 anchorPoint = hitRes.getPos();
                 anchorFacing = hitRes.getSide();
                 RendererUtils.showWebHit(anchorPoint, anchorFacing);
@@ -102,5 +105,4 @@ public class WebZip {
     public static boolean isZipping() {
         return zipCooldown > 0;
     }
-
 }

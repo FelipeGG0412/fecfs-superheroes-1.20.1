@@ -15,11 +15,14 @@ import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -47,14 +50,13 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     @Unique
     private void visibility(AbstractClientPlayerEntity player, float scale) {
         PlayerEntityModel<AbstractClientPlayerEntity> model = this.getModel();
+        RendererUtils.setModel(model);
         if(player != null) {
             RendererUtils.headVisibility(player, scale, model);
             RendererUtils.chestVisibility(player, scale, model);
             RendererUtils.legVisibility(player, scale, model);
         }
     }
-
-
     @Inject(at = @At("HEAD"), method = "renderArm", cancellable = true)
     private void renderArm(
             MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve,

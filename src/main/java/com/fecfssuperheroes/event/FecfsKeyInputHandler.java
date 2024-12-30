@@ -6,6 +6,7 @@ import com.fecfssuperheroes.ability.WebSwing;
 import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.networking.FecfsNetworking;
 import com.fecfssuperheroes.sound.FecfsSounds;
+import com.fecfssuperheroes.util.FecfsAnimations;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -42,23 +43,9 @@ public class FecfsKeyInputHandler {
     public static KeyBinding abilityThree;
     public static KeyBinding evade;
 
-    public static String getKeyAbilityOne() {
-        if(abilityOne != null) {
-            return abilityOne.getBoundKeyLocalizedText().getString();
-        } else {
-            return "";
-        }
-    }
-    public static String getKeyAbilityTwo() {
-        if(abilityOne != null) {
-            return abilityTwo.getBoundKeyLocalizedText().getString();
-        } else {
-            return "";
-        }
-    }
-    public static String getKeyAbilityThree() {
-        if(abilityOne != null) {
-            return abilityThree.getBoundKeyLocalizedText().getString();
+    public static String getAbilityKey(KeyBinding binding) {
+        if(binding != null) {
+            return binding.getBoundKeyLocalizedText().getString();
         } else {
             return "";
         }
@@ -129,8 +116,13 @@ public class FecfsKeyInputHandler {
             webZipKey = true;
         }
         if (abilityThree.wasPressed()) {
-            playProjectile = true;
+            if(!playProjectile) {
+                playProjectile = true;
+                FecfsAnimations.playWebShootAnimation(player);
+            }
             ClientPlayNetworking.send(FecfsNetworking.ABILITY_THREE_SPIDERMAN, PacketByteBufs.create());
+        } else {
+            playProjectile = false;
         }
         if(evade.wasPressed()) {
             Evade.performEvade(player);

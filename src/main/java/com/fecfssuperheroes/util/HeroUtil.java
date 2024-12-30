@@ -13,7 +13,6 @@ import net.minecraft.world.RaycastContext;
 
 public class HeroUtil {
     public static boolean canChargedJump = false;
-    public static boolean canPlayJumpAnimation = false;
     public static boolean isWearingSuit(PlayerEntity player, TagKey<Item> tag) {
         if (player != null && player.getInventory().armor.toArray().length == 4) {
             ItemStack helmet = player.getEquippedStack(EquipmentSlot.HEAD);

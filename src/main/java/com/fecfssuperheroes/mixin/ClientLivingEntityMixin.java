@@ -18,8 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Environment(EnvType.CLIENT)
 @Mixin(LivingEntity.class)
 public abstract class ClientLivingEntityMixin extends Entity implements Attackable {
-    @Unique
-    private ChargeJump chargeJump = new ChargeJump();
 
     public ClientLivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);

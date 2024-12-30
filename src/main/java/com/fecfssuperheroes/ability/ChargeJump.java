@@ -17,9 +17,9 @@ public class ChargeJump {
     private static final float MAX_JUMP_VELOCITY = 3.5f;
 
     public static int chargeTime = 0;
-    public boolean isCharging = false;
+    public static boolean isCharging = false;
     public static boolean charging = false;
-    private boolean startedWhileSprinting = false;
+    private static boolean startedWhileSprinting = false;
 
     private static boolean canChargeJump(PlayerEntity player) {
         return HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN)
@@ -27,18 +27,18 @@ public class ChargeJump {
                 && (player.isOnGround() || WebSwing.isSwinging) && player.isAlive();
     }
 
-    public void startCharging(PlayerEntity player, boolean isSprinting) {
+    public static void startCharging(PlayerEntity player, boolean isSprinting) {
         if(!canChargeJump(player)) return;
-        this.isCharging = true;
+        isCharging = true;
         charging = true;
-        this.chargeTime = 0;
-        this.startedWhileSprinting = isSprinting;
+        chargeTime = 0;
+        startedWhileSprinting = isSprinting;
     }
 
-    public void stopCharging(PlayerEntity player) {
+    public static void stopCharging(PlayerEntity player) {
         if(!canChargeJump(player)) return;
-        if (this.isCharging) {
-            this.isCharging = false;
+        if (isCharging) {
+            isCharging = false;
             charging = false;
 
             if (chargeTime < 5) {
@@ -73,32 +73,33 @@ public class ChargeJump {
         }
         chargeTime = 0;
     }
-    public void cancelCharge(PlayerEntity player) {
+    public static void cancelCharge(PlayerEntity player) {
         if(!canChargeJump(player) || !player.isOnGround()) {
-            this.isCharging = false;
+            isCharging = false;
             charging = false;
         }
     }
 
-    public void tick(PlayerEntity player) {
-        if (this.isCharging && canChargeJump(player)) {
+    public static void tick(PlayerEntity player) {
+        if (isCharging && canChargeJump(player)) {
             if (chargeTime < maxChargeTime(player)) {
                 chargeTime++;
                 updateChargeBar(player);
             }
         }
-        if((!canChargeJump(player) || !player.isOnGround()) && this.isCharging) {
+        if((!canChargeJump(player) || !player.isOnGround()) && isCharging) {
             cancelCharge(player);
         }
     }
 
     public boolean isCharging() {
-        return this.isCharging;
+        return isCharging;
     }
 
     public static float updateChargeBar(PlayerEntity player) {
         float chargePercentage = (float)(chargeTime - MIN_CHARGE_TIME) / (maxChargeTime(player) - MIN_CHARGE_TIME);
         return chargePercentage = Math.max(0, Math.min(chargePercentage, 1.0f));
     }
+
 }
 
