@@ -1,32 +1,24 @@
 package com.fecfssuperheroes.event;
 
-import com.eliotlash.mclib.math.functions.limit.Min;
-import com.fecfssuperheroes.ability.Evade;
-import com.fecfssuperheroes.ability.WebSwing;
-import com.fecfssuperheroes.ability.WebZip;
-import com.fecfssuperheroes.networking.FecfsNetworking;
-import com.fecfssuperheroes.sound.FecfsSounds;
-import com.fecfssuperheroes.util.FecfsAnimations;
-import com.fecfssuperheroes.util.FecfsTags;
-import com.fecfssuperheroes.util.HeroUtil;
+import com.fecfssuperheroes.ability.Ability;
+import com.fecfssuperheroes.hero.FecfsHeroes;
+import com.fecfssuperheroes.hero.Hero;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 public class FecfsKeyInputHandler {
     public static boolean playProjectile = false;
     public static boolean webSwingingKey = false;
     public static boolean webZipKey = false;
-    private static boolean wasUseKeyPressed = false;
-    private static boolean wasAttackKeyPressed = false;
 
 
     public static final String KEY_CATEGORY_ABILITIES = "key.category.abilities";
@@ -51,14 +43,8 @@ public class FecfsKeyInputHandler {
         }
     }
 
-    public static void registerKeyInputs() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            PlayerEntity player = MinecraftClient.getInstance().player;
-            MinecraftClient minecraftClient = MinecraftClient.getInstance();
-            if(player == null) return;
-            spiderManAbilities(player, minecraftClient);
-        });
-    }
+    private static Map<KeyBinding, Boolean> previousKeyStates = new HashMap<>();
+    private static Set<KeyBinding> keyBindings;
 
     public static void register() {
         abilityOne = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -86,47 +72,36 @@ public class FecfsKeyInputHandler {
                 KEY_CATEGORY_ABILITIES
         ));
 
+        keyBindings = Set.of(abilityOne, abilityTwo, abilityThree, evade);
+
         registerKeyInputs();
     }
 
-    private static void spiderManAbilities(PlayerEntity player, MinecraftClient client) {
-        boolean hasWebGear = HeroUtil.isWearingSuit(player, FecfsTags.Items.WEB_SLINGER)
-                || HeroUtil.isWearingWebShooter(player);
-        if (!hasWebGear) return;
-        if (abilityOne.wasPressed()) {
-            WebSwing.swingModeToggled = !WebSwing.swingModeToggled;
-        }
-        boolean useKeyPressed = client.options.useKey.isPressed();
-        if (WebSwing.swingModeToggled) {
-            if (useKeyPressed && !wasUseKeyPressed) {
-                WebSwing.startSwing(player);
-                webCooldown = HeroUtil.isWearingWebShooter(player) ? 300 : 80;
-                webSwingingKey = true;
+    public static void registerKeyInputs() {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            PlayerEntity player = client.player;
+            if (player == null) return;
+
+            Hero hero = FecfsHeroes.getCurrentHero(player);
+            if (hero == null) return;
+
+            Map<KeyBinding, Ability> heroAbilities = hero.getAbilities();
+            for (Map.Entry<KeyBinding, Ability> entry : heroAbilities.entrySet()) {
+                KeyBinding keyBinding = entry.getKey();
+                Ability ability = entry.getValue();
+
+                boolean isKeyPressed = keyBinding.isPressed();
+                boolean wasKeyPressed = previousKeyStates.getOrDefault(keyBinding, false);
+
+                if (isKeyPressed && !wasKeyPressed) {
+                    ability.onKeyPressed(player);
+                }
+                if (!isKeyPressed && wasKeyPressed) {
+                    ability.onKeyReleased(player);
+                }
+                previousKeyStates.put(keyBinding, isKeyPressed);
             }
-            wasUseKeyPressed = useKeyPressed;
-            boolean attackKeyPressed = client.options.attackKey.isPressed();
-            if (WebSwing.isSwinging && attackKeyPressed && !wasAttackKeyPressed) {
-                WebSwing.boost(player);
-                WebSwing.stopSwinging(player);
-            }
-            wasAttackKeyPressed = attackKeyPressed;
-        }
-        if (abilityTwo.wasPressed()) {
-            WebZip.startZip(player);
-            webZipKey = true;
-        }
-        if (abilityThree.wasPressed()) {
-            if(!playProjectile) {
-                playProjectile = true;
-                FecfsAnimations.playWebShootAnimation(player);
-            }
-            ClientPlayNetworking.send(FecfsNetworking.ABILITY_THREE_SPIDERMAN, PacketByteBufs.create());
-        } else {
-            playProjectile = false;
-        }
-        if(evade.wasPressed()) {
-            Evade.performEvade(player);
-        }
+        });
     }
 
 

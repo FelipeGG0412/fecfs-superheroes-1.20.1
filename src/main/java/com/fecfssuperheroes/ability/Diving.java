@@ -4,15 +4,21 @@ import com.fecfssuperheroes.util.FecfsAnimations;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
-public class Diving {
+public class Diving extends Ability {
     public static boolean isDiving = false;
     private static final int FALL_THRESHOLD = 10; // Adjust as necessary
     private static double startY = 0;
     private static boolean wasOnGround = true;
     private static double previousVelocityY = 0;
+
+    public Diving(KeyBinding keyBinding) {
+        super(keyBinding);
+    }
+
 
     public static boolean canDive(PlayerEntity player) {
         return HeroUtil.isWearingSuit(player, FecfsTags.Items.SPIDERMAN)

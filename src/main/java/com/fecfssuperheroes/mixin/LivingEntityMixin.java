@@ -2,6 +2,10 @@ package com.fecfssuperheroes.mixin;
 
 import com.fecfssuperheroes.ability.ChargeJump;
 import com.fecfssuperheroes.ability.WebSwing;
+import com.fecfssuperheroes.hero.FecfsHeroes;
+import com.fecfssuperheroes.hero.Hero;
+import com.fecfssuperheroes.power.Power;
+import com.fecfssuperheroes.power.custom.FallResistance;
 import com.fecfssuperheroes.power.custom.Jump;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.client.MinecraftClient;
@@ -9,17 +13,25 @@ import net.minecraft.entity.Attackable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTracker;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements Attackable {
+    @Shadow protected abstract void playBlockFallSound();
+
+    @Shadow protected abstract void playHurtSound(DamageSource source);
+
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
@@ -71,5 +83,33 @@ public abstract class LivingEntityMixin extends Entity implements Attackable {
                 // FecfsAnimations.playSpiderManJumpAnimation(player);
             }
         }
+    }
+    @ModifyArg(
+            method = "handleFallDamage",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"
+            ),
+            index = 1
+    )
+    private float modifyFallDamageAmount(DamageSource source, float originalAmount) {
+        if ((Object) this instanceof PlayerEntity player) {
+            Hero currentHero = FecfsHeroes.getCurrentHero(player);
+            if (currentHero != null) {
+                Power fallResistancePower = currentHero.getPowers().get("Fall resistance");
+                if (fallResistancePower != null) {
+                    // Calculate reduced damage
+                    float reducedAmount = originalAmount * (1 - (fallResistancePower.getAmplifier() / 100.0f));
+                    if (reducedAmount < 0.4f) {
+                        return 0.0f;
+                    }
+
+                    return reducedAmount;
+                }
+            }
+        }
+
+        // Return the original amount if no adjustments are needed
+        return originalAmount;
     }
 }

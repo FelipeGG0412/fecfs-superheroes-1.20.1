@@ -1,6 +1,7 @@
 package com.fecfssuperheroes.util;
 
 import com.fecfssuperheroes.item.FecfsItems;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,7 +12,13 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Consumer;
+
 public class HeroUtil {
+    private static final List<ScheduledAction> scheduledActions = new ArrayList<>();
     public static boolean canChargedJump = false;
     public static boolean isWearingSuit(PlayerEntity player, TagKey<Item> tag) {
         if (player != null && player.getInventory().armor.toArray().length == 4) {
@@ -65,5 +72,38 @@ public class HeroUtil {
         } else {
             return false;
         }
+    }
+    static {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> onClientTick(client));
+    }
+
+    private static void onClientTick(MinecraftClient client) {
+        if (client.isPaused()) {
+            return;
+        }
+
+        PlayerEntity player = client.player;
+        if (player == null) {
+            return;
+        }
+
+        Iterator<ScheduledAction> iterator = scheduledActions.iterator();
+        while (iterator.hasNext()) {
+            ScheduledAction scheduledAction = iterator.next();
+            scheduledAction.decrementTicks();
+            if (scheduledAction.getTicksLeft() <= 0) {
+                scheduledAction.getAction().accept(player);
+                iterator.remove();
+            }
+        }
+    }
+    public static void tickAction(int ticksToWait, Consumer<PlayerEntity> action) {
+        if (ticksToWait <= 0) {
+            throw new IllegalArgumentException("ticks must be positive!");
+        }
+        if (action == null) {
+            throw new NullPointerException("action cannot be null!");
+        }
+        scheduledActions.add(new ScheduledAction(ticksToWait, action));
     }
 }

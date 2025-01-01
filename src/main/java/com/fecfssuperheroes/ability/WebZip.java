@@ -1,7 +1,6 @@
 package com.fecfssuperheroes.ability;
 
 import com.fecfssuperheroes.networking.FecfsNetworking;
-import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import com.fecfssuperheroes.util.RendererUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -9,13 +8,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-public class WebZip {
+public class WebZip extends Ability{
     private static boolean isZipping = false;
     public static boolean play = false;
     public static boolean canZip = false;
@@ -24,6 +24,12 @@ public class WebZip {
     private static final int ZIP_DURATION_TICKS = 5;
     private static int zipTickCounter = 0;
     public static Direction anchorFacing = null;
+
+    public WebZip(KeyBinding keyBinding) {
+        super(keyBinding);
+        register();
+    }
+
 
     public static void register() {
         ClientTickEvents.START_CLIENT_TICK.register(WebZip::onClientTick);
@@ -41,7 +47,14 @@ public class WebZip {
             }
         });
     }
-    public static void startZip(PlayerEntity player) {
+//    public static void startZip(PlayerEntity player) {
+//
+//    }
+    private static void onClientTick(MinecraftClient client) {
+    }
+
+    @Override
+    public void start(PlayerEntity player) {
         if(WebSwing.isSwinging) return;
         if (HeroUtil.canUseWeb(player, true) && zipCooldown == 0) {
             BlockHitResult hitRes = HeroUtil.raycast(player, (HeroUtil.isWearingWebShooter(player) ? 100 : 150));
@@ -63,16 +76,34 @@ public class WebZip {
             }
         }
     }
-    private static void onClientTick(MinecraftClient client) {
+
+    @Override
+    public void update(PlayerEntity player) {
+        MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         if (zipCooldown > 0) {
             zipCooldown--;
         }
         if (isZipping && anchorPoint != null) {
-            performZip(client.player);
+            zip(client.player);
         }
     }
-    private static void performZip(PlayerEntity player) {
+
+    @Override
+    public void stop(PlayerEntity player) {
+        if (MinecraftClient.getInstance().player != null && anchorPoint != null) {
+            Vec3d webStartPos = RendererUtils.webStartPosition(MinecraftClient.getInstance().player, 0);
+            if (webStartPos != null) {
+                RendererUtils.addWebLine(webStartPos, anchorPoint);
+            }
+        }
+        isZipping = false;
+        anchorPoint = null;
+        zipTickCounter = 0;
+        MinecraftClient.getInstance().player.getAbilities().allowFlying = true;
+    }
+
+    private static void zip(PlayerEntity player) {
         if (anchorPoint == null || zipTickCounter >= ZIP_DURATION_TICKS) {
             stopZip();
             return;

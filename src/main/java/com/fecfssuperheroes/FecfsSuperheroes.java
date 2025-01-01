@@ -2,6 +2,7 @@ package com.fecfssuperheroes;
 
 import com.fecfssuperheroes.entity.FecfsEntities;
 import com.fecfssuperheroes.event.FecfsEventHandler;
+import com.fecfssuperheroes.hero.FecfsHeroes;
 import com.fecfssuperheroes.item.FecfsItems;
 import com.fecfssuperheroes.networking.FecfsNetworking;
 import com.fecfssuperheroes.sound.FecfsSounds;
@@ -23,6 +24,7 @@ public class FecfsSuperheroes implements ModInitializer {
 		FecfsEventHandler.register();
 		FecfsNetworking.registerC2SPackets();
 		FecfsSounds.registerSounds();
+		FecfsHeroes.registerServerTick();
 
 		GeckoLib.initialize();
 

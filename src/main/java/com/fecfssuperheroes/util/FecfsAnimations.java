@@ -34,7 +34,7 @@ public class FecfsAnimations implements IAnimatedHero {
             var builder = anim.mutableCopy();
             builder.head.yaw.setEnabled(false);
             anim = builder.build();
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(2, Ease.LINEAR),
+            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(0, Ease.LINEAR),
                     new KeyframeAnimationPlayer(anim));
         }
 
@@ -65,21 +65,10 @@ public class FecfsAnimations implements IAnimatedHero {
                 rightArm ? "smsr_shoot_web_right" : "smsr_shoot_web_left"));
         if(anim != null) {
             var builder = anim.mutableCopy();
-            builder.head.fullyEnablePart(false);
+            builder.head.yaw.setEnabled(false);
             anim = builder.build();
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(1, Ease.LINEAR),
-                    new KeyframeAnimationPlayer(anim).setFirstPersonMode(FirstPersonMode.VANILLA));
-
-        }
-    }
-    public static void playDiveIntroAnimation(PlayerEntity user) {
-        if (!HeroUtil.isWearingSuit(user, spiderManTag)) return;
-
-        var animationContainer = ((IAnimatedHero) user).fecfsSuperheroes_getModAnimation();
-        KeyframeAnimation anim = PlayerAnimationRegistry.getAnimation(new Identifier(FecfsSuperheroes.MOD_ID, "smsr_dive_intro"));
-
-        if (anim != null) {
             animationContainer.setAnimation(new KeyframeAnimationPlayer(anim));
+
         }
     }
 
@@ -90,10 +79,22 @@ public class FecfsAnimations implements IAnimatedHero {
         KeyframeAnimation anim = PlayerAnimationRegistry.getAnimation(new Identifier(FecfsSuperheroes.MOD_ID, "smsr_dive"));
 
         if (anim != null) {
+            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.LINEAR),
+                    new  KeyframeAnimationPlayer(anim));
+        }
+    }
+    public static void playSwingPlaceHolderAnimation(PlayerEntity user) {
+        if (!HeroUtil.isWearingSuit(user, spiderManTag)) return;
+
+        var animationContainer = ((IAnimatedHero) user).fecfsSuperheroes_getModAnimation();
+        KeyframeAnimation anim = PlayerAnimationRegistry.getAnimation(new Identifier(FecfsSuperheroes.MOD_ID, "swing_placeholder"));
+
+        if (anim != null) {
             animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(2, Ease.LINEAR),
                     new  KeyframeAnimationPlayer(anim));
         }
     }
+
     public static void stopAnimation(PlayerEntity player){
         var animationContainer = ((IAnimatedHero) player).fecfsSuperheroes_getModAnimation();
         if(animationContainer.isActive()) {

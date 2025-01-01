@@ -1,10 +1,10 @@
 package com.fecfssuperheroes.mixin;
 
-import com.fecfssuperheroes.ability.WebSwing;
-import com.fecfssuperheroes.ability.WebZip;
 import com.fecfssuperheroes.util.FecfsAnimations;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
+    @Shadow public abstract void playSound(SoundEvent sound, float volume, float pitch);
+
     @Unique
     private boolean isFalling = false;
     @Unique
@@ -23,8 +25,6 @@ public abstract class PlayerEntityMixin {
     private void onTick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (!player.getWorld().isClient) return;
-
-        // Track the start of a fall
         if (!player.isOnGround() && player.getVelocity().y < 0) {
             if (!isFalling) {
                 isFalling = true;
@@ -32,16 +32,15 @@ public abstract class PlayerEntityMixin {
                 startY = player.getY();
             }
         }
-
-        // Handle landing logic
         if (player.isOnGround() && isFalling) {
             isFalling = false;
             double fallDistance = Math.max(player.fallDistance, startY - player.getY());
 
             if (fallDistance >= 10 && !hasPlayedLandingAnimation) {
                 hasPlayedLandingAnimation = true;
-                FecfsAnimations.playSpiderManLandingAnimation(player); // Play landing animation
+                FecfsAnimations.playSpiderManLandingAnimation(player);
             }
         }
+
     }
 }

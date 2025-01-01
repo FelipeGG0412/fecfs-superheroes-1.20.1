@@ -1,9 +1,10 @@
 package com.fecfssuperheroes.ability;
 
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
-public class Evade  {
+public class Evade extends Ability {
     private static boolean isDodging = false;
     private static boolean cooldown = false;
     public static boolean hasDodged = false;
@@ -12,6 +13,16 @@ public class Evade  {
     private static final int DODGE_RESET_TIME = 40;
     private static final int DODGE_COOLDOWN = 20;
     private static final int DODGE_DURATION = 20;
+
+    public Evade(KeyBinding keyBinding) {
+        super(keyBinding);
+    }
+
+    @Override
+    public void start(PlayerEntity player) {
+        performEvade(player);
+    }
+
 
     public static void performEvade(PlayerEntity player) {
         if (player == null) return;

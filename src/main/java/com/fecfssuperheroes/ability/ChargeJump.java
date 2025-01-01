@@ -3,10 +3,16 @@ package com.fecfssuperheroes.ability;
 import com.fecfssuperheroes.util.FecfsTags;
 import com.fecfssuperheroes.util.HeroUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
-public class ChargeJump {
+public class ChargeJump extends Ability{
+
+    public ChargeJump(KeyBinding keyBinding) {
+        super(keyBinding);
+    }
+
     public static final int maxChargeTime(PlayerEntity player) {
         if(player == null) return 0;
         else {
@@ -100,6 +106,5 @@ public class ChargeJump {
         float chargePercentage = (float)(chargeTime - MIN_CHARGE_TIME) / (maxChargeTime(player) - MIN_CHARGE_TIME);
         return chargePercentage = Math.max(0, Math.min(chargePercentage, 1.0f));
     }
-
 }
 
