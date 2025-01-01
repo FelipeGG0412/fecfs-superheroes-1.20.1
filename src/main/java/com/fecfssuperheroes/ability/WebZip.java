@@ -59,6 +59,8 @@ public class WebZip extends Ability{
         if (HeroUtil.canUseWeb(player, true) && zipCooldown == 0) {
             BlockHitResult hitRes = HeroUtil.raycast(player, (HeroUtil.isWearingWebShooter(player) ? 100 : 150));
             if (hitRes != null && hitRes.getType() == HitResult.Type.BLOCK) {
+                if(player.getVelocity() == null) return;
+
                 if (Diving.isDiving) {
                     Diving.stopDive(player);
                 }
@@ -92,6 +94,8 @@ public class WebZip extends Ability{
     @Override
     public void stop(PlayerEntity player) {
         if (MinecraftClient.getInstance().player != null && anchorPoint != null) {
+            if(player.getVelocity() == null) return;
+
             Vec3d webStartPos = RendererUtils.webStartPosition(MinecraftClient.getInstance().player, 0);
             if (webStartPos != null) {
                 RendererUtils.addWebLine(webStartPos, anchorPoint);
@@ -104,6 +108,7 @@ public class WebZip extends Ability{
     }
 
     private static void zip(PlayerEntity player) {
+        if(player.getVelocity() == null) return;
         if (anchorPoint == null || zipTickCounter >= ZIP_DURATION_TICKS) {
             stopZip();
             return;
@@ -119,6 +124,8 @@ public class WebZip extends Ability{
     }
     private static void stopZip() {
         if (MinecraftClient.getInstance().player != null && anchorPoint != null) {
+            if(MinecraftClient.getInstance().player.getVelocity() == null) return;
+
             Vec3d webStartPos = RendererUtils.webStartPosition(MinecraftClient.getInstance().player, 0);
             if (webStartPos != null) {
                 RendererUtils.addWebLine(webStartPos, anchorPoint);

@@ -34,8 +34,8 @@ public class FecfsAnimations implements IAnimatedHero {
             var builder = anim.mutableCopy();
             builder.head.yaw.setEnabled(false);
             anim = builder.build();
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(0, Ease.LINEAR),
-                    new KeyframeAnimationPlayer(anim));
+            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(1, Ease.OUTCIRC),
+                    new  KeyframeAnimationPlayer(anim));
         }
 
     }
@@ -45,8 +45,8 @@ public class FecfsAnimations implements IAnimatedHero {
         KeyframeAnimation anim = PlayerAnimationRegistry.getAnimation(new Identifier(FecfsSuperheroes.MOD_ID,
                 "smsr_land"));;
         if(anim != null) {
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(1, Ease.LINEAR),
-                    new KeyframeAnimationPlayer(anim));
+            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(1, Ease.OUTCIRC),
+                    new  KeyframeAnimationPlayer(anim));
         }
 
     }
@@ -79,7 +79,7 @@ public class FecfsAnimations implements IAnimatedHero {
         KeyframeAnimation anim = PlayerAnimationRegistry.getAnimation(new Identifier(FecfsSuperheroes.MOD_ID, "smsr_dive"));
 
         if (anim != null) {
-            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(4, Ease.LINEAR),
+            animationContainer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(7, Ease.LINEAR),
                     new  KeyframeAnimationPlayer(anim));
         }
     }

@@ -25,6 +25,7 @@ public class DoubleJump extends Power {
 
     public static void onTick(PlayerEntity player) {
         if (player == null) return;
+        if(player.getVelocity() == null) return;
 
 
         if (player.isOnGround()) {

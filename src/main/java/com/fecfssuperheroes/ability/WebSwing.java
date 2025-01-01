@@ -42,9 +42,10 @@ public class WebSwing extends Ability {
     public static boolean swingModeToggled = false;
     public static Arm currentSwingArm = Arm.RIGHT;
     private static boolean wasDiving = false;
-    private static final double MAX_SPEED = 3.75;
+    private static final double MAX_SPEED = 3.25;
     private boolean wasUseKeyPressed = false;
     private boolean wasAttackKeyPressed = false;
+    private static int groundTimeCounter = 0;
 
     public WebSwing(KeyBinding keyBinding) {
         super(keyBinding);
@@ -78,6 +79,11 @@ public class WebSwing extends Ability {
             if (cooldownTicks > 0) cooldownTicks--;
             else isCooldownActive = false;
         }
+        if(client.player.isOnGround()) {
+            groundTimeCounter++;
+        } else {
+            groundTimeCounter = 0;
+        }
         if (isSwinging) {
             swing(client.player);
             if(!playedAnimation) {
@@ -85,7 +91,7 @@ public class WebSwing extends Ability {
                 playedAnimation = true;
                 stoppedAnimation = false;
             }
-        } else if(!stoppedAnimation) {
+        } else if(!stoppedAnimation && !isSwinging) {
             FecfsAnimations.stopAnimation(client.player);
             stoppedAnimation = true;
             playedAnimation = false;
@@ -97,26 +103,45 @@ public class WebSwing extends Ability {
             stopSwinging(player);
             return;
         }
-        swingDuration++;
-        swingTime++;
+        if (player.getVelocity() == null) return;
         if (swingTime > 400) {
             stopSwinging(player);
             return;
         }
+        swingDuration++;
+        swingTime++;
+
+        if (swingTime > 400 || groundTimeCounter >= 25) {
+            stopSwinging(player);
+            return;
+        }
+
         Vec3d playerPos = player.getPos();
         Vec3d toAnchor = anchorPoint.subtract(playerPos);
         double distanceToAnchor = toAnchor.length();
-        double boostedSpeed = Diving.isDiving ? MAX_SPEED : 2.5;
+        Vec3d radialDirection = toAnchor.normalize();
+
+        double maxSpeed = Diving.isDiving ? MAX_SPEED : 2.5;
+
         if (distanceToAnchor > webLength) {
-            Vec3d radialDirection = toAnchor.normalize();
             Vec3d tangentialVelocity = player.getVelocity().subtract(radialDirection.multiply(player.getVelocity().dotProduct(radialDirection)));
-            player.setVelocity(tangentialVelocity.add(new Vec3d(0, -0.08, 0)).multiply(0.9935).normalize().multiply(boostedSpeed));
+            Vec3d adjustedVelocity = tangentialVelocity.add(0, -0.08, 0).multiply(0.9985);
+
+            if (adjustedVelocity.length() > maxSpeed) {
+                adjustedVelocity = adjustedVelocity.normalize().multiply(maxSpeed);
+            }
+
+            player.setVelocity(adjustedVelocity);
             applyPlayerInput(player);
         } else {
-            player.setVelocity(player.getVelocity().add(0, -0.08, 0));
+            Vec3d adjustedVelocity = player.getVelocity().add(0, -0.08, 0);
+
+            if (adjustedVelocity.length() > maxSpeed) {
+                adjustedVelocity = adjustedVelocity.normalize().multiply(maxSpeed);
+            }
+
+            player.setVelocity(adjustedVelocity);
             applyPlayerInput(player);
-            if (player.getVelocity().length() > (wasDiving ? 3.75 : 2.5))
-                player.setVelocity(player.getVelocity().normalize().multiply(wasDiving ? 3.75 : 2.5));
         }
     }
 
@@ -165,6 +190,7 @@ public class WebSwing extends Ability {
                 if (Diving.isDiving) {
                     Diving.stopDive(player);
                 }
+                if(player.getVelocity() == null) return;
                 anchorPoint = hitRes.getPos();
                 anchorFacing = hitRes.getSide();
                 RendererUtils.showWebHit(anchorPoint, anchorFacing);
@@ -191,6 +217,8 @@ public class WebSwing extends Ability {
     }
 
     private static void applyPlayerInput(PlayerEntity player) {
+        if(player.getVelocity() == null) return;
+
         Vec3d input = getMovementInput(player) != null ? getMovementInput(player) : Vec3d.ZERO;
         if(input == null) return;
         player.setVelocity(player.getVelocity().add(input.multiply(0.045)));
@@ -199,6 +227,8 @@ public class WebSwing extends Ability {
     }
 
     private static Vec3d getMovementInput(PlayerEntity player) {
+        if(player.getVelocity() == null) return null;
+
         ClientPlayerEntity playerEntity = MinecraftClient.getInstance().player;
         if (playerEntity != null) {
             float forward = playerEntity.input.movementForward;
@@ -215,6 +245,8 @@ public class WebSwing extends Ability {
     }
 
     public static void stopSwinging(PlayerEntity player) {
+        if(player.getVelocity() == null) return;
+
         Vec3d webStartPos = RendererUtils.webStartPosition(player, 0);
         RendererUtils.addWebLine(webStartPos, anchorPoint);
         if (webStartPos != null && anchorPoint != null) RendererUtils.addWebLine(webStartPos, anchorPoint);
@@ -238,7 +270,9 @@ public class WebSwing extends Ability {
     }
 
     public static void boost(PlayerEntity player) {
-        if (!isSwinging || anchorPoint == null) return;
+        if (!isSwinging || anchorPoint == null || player.isOnGround()) return;
+        if(player.getVelocity() == null) return;
+
         Vec3d forwardDirection = player.getRotationVector().normalize();
         Vec3d boostVelocity = forwardDirection.multiply(1.5).add(0, 1.5, 0);
         player.setVelocity(player.getVelocity().add(boostVelocity));

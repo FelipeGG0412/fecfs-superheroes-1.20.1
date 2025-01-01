@@ -35,6 +35,8 @@ public class ChargeJump extends Ability{
 
     public static void startCharging(PlayerEntity player, boolean isSprinting) {
         if(!canChargeJump(player)) return;
+        if(player.getVelocity() == null) return;
+
         isCharging = true;
         charging = true;
         chargeTime = 0;
@@ -46,6 +48,8 @@ public class ChargeJump extends Ability{
         if (isCharging) {
             isCharging = false;
             charging = false;
+            if(player.getVelocity() == null) return;
+
 
             if (chargeTime < 5) {
                 player.jump();

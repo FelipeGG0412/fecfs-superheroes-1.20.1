@@ -28,6 +28,7 @@ public class FecfsHeroes {
         Ability webZip = new WebZip(FecfsKeyInputHandler.abilityTwo);
         Ability webShoot = new WebShoot(FecfsKeyInputHandler.abilityThree);
         Ability evade = new Evade(FecfsKeyInputHandler.evade);
+        Ability wallCrawlSpiderMan = new WallCrawling();
 
 
 
@@ -36,21 +37,27 @@ public class FecfsHeroes {
         Hero spiderManRaimi = Hero.create()
                 .name("Spider-Man Raimi")
                 .nameKey("smsr")
+
                 .addArmorTag(spiderManTag)
                 .addArmorTag(raimiTag)
                 .addArmorTag(webSlinger)
                 .addArmorTag(hero)
                 .addArmorTag(wallCrawler)
+
                 .addPower("Strength", new Strength(7))
                 .addPower("Speed", new Speed(4))
                 .addPower("Jump", new Jump(3))
                 .addPower("Double-Jump", new DoubleJump(1))
                 .addPower("Fall resistance", new FallResistance(50))
                 .addPower("Resistance", new Resistance(60))
+
                 .setAbility(FecfsKeyInputHandler.abilityOne, webSwing)
                 .setAbility(FecfsKeyInputHandler.abilityTwo, webZip)
                 .setAbility(FecfsKeyInputHandler.abilityThree, webShoot)
                 .setAbility(FecfsKeyInputHandler.evade, evade)
+
+                .addPassiveAbility(wallCrawlSpiderMan)
+
                 .setTier(6)
                 .build();
         HEROES.put(spiderManRaimi.getName(), spiderManRaimi);
@@ -77,7 +84,6 @@ public class FecfsHeroes {
             }
         });
     }
-
     public static Hero getCurrentHero(PlayerEntity player) {
         for (Hero hero : HEROES.values()) {
             if (hero.isWearingFullSet(player)) {
@@ -86,7 +92,6 @@ public class FecfsHeroes {
         }
         return null;
     }
-
 
 
     public static void registerServerTick() {

@@ -45,14 +45,10 @@ public class Hero {
     public List<Ability> getPassiveAbilities() {
         return passiveAbilities;
     }
-
-    // Apply all abilities (active and passive)
     public void updateAbilities(PlayerEntity player) {
-        // Update active abilities
         for (Ability ability : abilities.values()) {
             ability.update(player);
         }
-        // Update passive abilities
         for (Ability ability : passiveAbilities) {
             ability.update(player);
         }
@@ -138,6 +134,7 @@ public class Hero {
         private final Map<String, Power> powers = new HashMap<>();
         private final Map<KeyBinding, Ability> abilities = new HashMap<>();
         private final Set<TagKey<Item>> armorTags = new HashSet<>();
+        private final List<Ability> passiveAbilities = new ArrayList<>();
 
         public Builder name(String name) {
             this.name = name;
@@ -156,7 +153,12 @@ public class Hero {
 
         public Builder setAbility(KeyBinding keyBinding, Ability ability) {
             this.abilities.put(keyBinding, ability);
-            return this; // Ensure the builder is returned
+            return this;
+        }
+
+        public Builder addPassiveAbility(Ability ability) {
+            this.passiveAbilities.add(ability);
+            return this;
         }
 
         public Builder addArmorTag(TagKey<Item> tag) {
@@ -182,7 +184,9 @@ public class Hero {
         }
 
         public Hero build() {
-            return new Hero(name, nameKey, tier, isAlt, alternates, powers, abilities, armorTags);
+            Hero hero = new Hero(name, nameKey, tier, isAlt, alternates, powers, abilities, armorTags);
+            hero.passiveAbilities.addAll(this.passiveAbilities);
+            return hero;
         }
     }
 }

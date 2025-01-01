@@ -27,6 +27,8 @@ public class Evade extends Ability {
     public static void performEvade(PlayerEntity player) {
         if (player == null) return;
         if(!player.isOnGround() && !player.getAbilities().flying && player.isAlive() && !WebSwing.isSwinging && !WebZip.isZipping()) return;
+        if(player.getVelocity() == null) return;
+
         int currentTime = player.age;
         if (currentTime - lastDodgeTime < DODGE_COOLDOWN) {
             return;
@@ -34,7 +36,8 @@ public class Evade extends Ability {
         if (Diving.isDiving) {
             Diving.stopDive(player);
         }
-        Vec3d dodgeDirection = getMovementInputDirection(player);
+        Vec3d dodgeDirection = getMovementInputDirection(player) != null ? getMovementInputDirection(player) : null;
+        if(dodgeDirection == null) return;
         if (dodgeDirection.lengthSquared() == 0) {
             return;
         }
@@ -55,6 +58,7 @@ public class Evade extends Ability {
     }
 
     private static Vec3d getMovementInputDirection(PlayerEntity player) {
+        if(player.getVelocity() == null) return null;
         Vec3d velocity = player.getVelocity();
         if (velocity.lengthSquared() > 0.0001) {
             return new Vec3d(velocity.x, 0, velocity.z);

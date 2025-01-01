@@ -27,12 +27,16 @@ public class Diving extends Ability {
                 && player.isAlive()
                 && !player.isTouchingWater()
                 && !WebSwing.isSwinging
-                && !WebZip.isZipping();
+                && !WebZip.isZipping()
+                && !WallCrawling.isCrawling;
     }
 
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) return;
         PlayerEntity player = client.player;
+
+        if(player.getVelocity() == null) return;
+
 
         double currentVelocityY = player.getVelocity().y;
 
@@ -46,7 +50,6 @@ public class Diving extends Ability {
             }
         } else {
             if (wasOnGround) {
-                // Player just left the ground
                 wasOnGround = false;
                 startY = player.getY();
             }
@@ -88,10 +91,10 @@ public class Diving extends Ability {
             stopDive(player);
             return;
         }
+        if(player.getVelocity() == null) return;
 
         Vec3d velocity = player.getVelocity();
-        // Apply extra downward force to simulate diving
-        player.setVelocity(velocity.add(0, -0.02, 0));
+        player.setVelocity(velocity.add(0, -0.03, 0));
     }
 
     public static void stopDive(PlayerEntity player) {
